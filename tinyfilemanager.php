@@ -1,6 +1,52 @@
 <?php
 //Default Configuration
-$CONFIG = '{"lang":"en","error_reporting":false,"show_hidden":false,"hide_Cols":false,"calc_folder":false,"theme":"light"}';
+$CONFIG = '{"lang":"en","error_reporting":true,"show_hidden":false,"hide_Cols":false,"calc_folder":false,"theme":"light"}';
+// Tiny File Manager is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Tiny File Manager is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Tiny File Manager.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * This plugin for Moodle is used to view and manage files through a web interface.
+ *
+ * @package    local_tinyfilemanager
+ * @copyright  2013-2018 Alex Yashkin (MIT license)
+ * @copyright  2014-2016 Icons by Yusuke Kamiyamane.
+ * @copyright  2020 TNG Consulting Inc. - www.tngconsulting.ca
+ * @Author     Alex Yashkin
+ * @author     Michael Milette
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+require_once(dirname(__FILE__) . '/../../config.php');
+
+$context = context_system::instance();
+$PAGE->set_context($context);
+$PAGE->set_heading($SITE->fullname);
+$PAGE->set_pagelayout('standard');
+$PAGE->set_title(get_string('pluginname', 'local_tinyfilemanager'));
+$PAGE->set_url($CFG->wwwroot . '/local/tinyfilemanager/index.php');
+$PAGE->navbar->add(get_string('pluginname', 'local_tinyfilemanager'));
+
+// We require Admin to be logged in.
+require_login(0, false);
+if (!is_siteadmin()) {
+    // Set message that session has timed out.
+    $SESSION->has_timed_out = 1;
+    header('HTTP/1.0 403 Forbidden');
+    die(get_string('accessdenied', 'admin'));
+}
+
+//Default Configuration
+$CONFIG = '{"lang":"en","error_reporting":true,"show_hidden":true,"hide_Cols":false,"calc_folder":false,"theme":"light"}';
 
 /**
  * H3K | Tiny File Manager V2.4.6
@@ -11,8 +57,17 @@ $CONFIG = '{"lang":"en","error_reporting":false,"show_hidden":false,"hide_Cols":
 //TFM version
 define('VERSION', '2.4.6');
 
-//Application Title
+//
+// Moodle Settings Integration
+//
+// Application Title
 define('APP_TITLE', 'Tiny File Manager');
+define('FM_EMBED', 1);
+define('FM_ROOT_URL', $CFG->wwwroot);
+define('FM_SELF_URL', $CFG->wwwroot . '/local/tinyfilemanager/index.php');
+define('FM_DATETIME_FORMAT', get_string('strftimedatetimeshort', 'core_langconfig'));
+define('FM_LOCKSETTINGS', 1);
+unset($_GET['settings']); // Disable built-in settings.
 
 // --- EDIT BELOW CONFIGURATION CAREFULLY ---
 
@@ -28,6 +83,10 @@ $auth_users = array(
     'admin' => '$2y$10$/K.hjNr84lLNDt8fTXjoI.DBp6PpeyoJ.mGwrrLuCZfAwfSAGqhOW', //admin@123
     'user' => '$2y$10$Fg6Dz8oH9fPoZ2jJan5tZuv6Z4Kp7avtQ9bDfrdRntXtPeiMAZyGO' //12345
 );
+
+//set application theme
+//options - 'light' and 'dark'
+$theme = 'light';
 
 // Readonly users
 // e.g. array('users', 'guest', ...)
@@ -51,7 +110,7 @@ $default_timezone = 'Etc/UTC'; // UTC
 
 // Root path for file manager
 // use absolute path of directory i.e: '/var/www/folder' or $_SERVER['DOCUMENT_ROOT'].'/folder'
-$root_path = $_SERVER['DOCUMENT_ROOT'];
+$root_path = $CFG->dirroot;
 
 // Root url for links in file manager.Relative to $http_host. Variants: '', 'path/to/subfolder'
 // Will not working if $root_path will be outside of server document root
@@ -82,7 +141,7 @@ $allowed_upload_extensions = '';
 // Favicon path. This can be either a full url to an .PNG image, or a path based on the document root.
 // full path, e.g http://example.com/favicon.png
 // local path, e.g images/icons/favicon.png
-$favicon_path = '';
+$favicon_path = '?img=favicon';
 
 // Files and folders to excluded from listing
 // e.g. array('myfile.html', 'personal-folder', '*.php', ...)
@@ -127,14 +186,24 @@ $ip_blacklist = array(
 );
 
 // if User has the customized config file, try to use it to override the default config above
-$config_file = __DIR__.'/config.php';
-if (is_readable($config_file)) {
-    @include($config_file);
-}
+// $config_file = __DIR__.'/config.php';
+// if (is_readable($config_file)) {
+//     @include($config_file);
+// }
 
 // --- EDIT BELOW CAREFULLY OR DO NOT EDIT AT ALL ---
 
+function human_readable_to_bytes(string $amount): int {
+    $units = ['', 'K', 'M', 'G'];
+    
+    preg_match('/(\d+)\s?([KMG]?)/', $amount, $matches);
+    [$_, $nr, $unit] = $matches;
+    $exp = array_search($unit, $units);
+    return (int)$nr * pow(1024, $exp);
+}
+
 // max upload file size
+$max_upload_size_bytes = min(human_readable_to_bytes(ini_get('post_max_size')), human_readable_to_bytes(ini_get('upload_max_filesize')));
 define('MAX_UPLOAD_SIZE', $max_upload_size_bytes);
 
 // private key and session name to store to the session
@@ -146,13 +215,13 @@ if ( !defined( 'FM_SESSION_ID')) {
 $cfg = new FM_Config();
 
 // Default language
-$lang = isset($cfg->data['lang']) ? $cfg->data['lang'] : 'en';
+$lang = strtolower(substr(current_language(), 0, 2));
 
 // Show or hide files and folders that starts with a dot
 $show_hidden_files = isset($cfg->data['show_hidden']) ? $cfg->data['show_hidden'] : true;
 
 // PHP error reporting - false = Turns off Errors, true = Turns on Errors
-$report_errors = isset($cfg->data['error_reporting']) ? $cfg->data['error_reporting'] : true;
+$report_errors = ($CFG->debugdisplay == 1);
 
 // Hide Permissions and Owner cols in file-listing
 $hide_Cols = isset($cfg->data['hide_Cols']) ? $cfg->data['hide_Cols'] : true;
@@ -164,10 +233,9 @@ $calc_folder = isset($cfg->data['calc_folder']) ? $cfg->data['calc_folder'] : tr
 $theme = isset($cfg->data['theme']) ? $cfg->data['theme'] : 'light';
 
 define('FM_THEME', $theme);
-
 //available languages
 $lang_list = array(
-    'en' => 'English'
+    $lang => ''
 );
 
 if ($report_errors == true) {
@@ -235,6 +303,11 @@ if (isset($_GET['logout'])) {
     fm_redirect(FM_SELF_URL);
 }
 
+// Show image here
+//if (isset($_GET['img'])) {
+//    fm_show_image($_GET['img']);
+//}
+
 // Validate connection IP
 if($ip_ruleset != 'OFF'){
     $clientIp = $_SERVER['REMOTE_ADDR'];
@@ -260,8 +333,9 @@ if($ip_ruleset != 'OFF'){
 
         if($ip_silent == false){
             fm_set_msg(lng('Access denied. IP restriction applicable'), 'error');
-            fm_show_header_login();
+            echo $OUTPUT->header();
             fm_show_message();
+            echo $OUTPUT->footer();
         }
 
         exit();
@@ -291,7 +365,9 @@ if ($use_auth) {
     } else {
         // Form
         unset($_SESSION[FM_SESSION_ID]['logged']);
-        fm_show_header_login();
+
+        // Display page header.
+        echo $OUTPUT->header();
         ?>
         <section class="h-100">
             <div class="container h-100">
@@ -346,7 +422,7 @@ if ($use_auth) {
         </section>
 
         <?php
-        fm_show_footer_login();
+        echo $OUTPUT->footer();
         exit;
     }
 }
@@ -1182,7 +1258,7 @@ if (isset($_GET['upload']) && !FM_READONLY) {
     }
     ?>
 
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.5.1/min/dropzone.min.css" rel="stylesheet">
+    <link href="<?php echo $CFG->wwwroot; ?>/local/tinyfilemanager/style/dropzone.min.css" rel="stylesheet">
     <div class="path">
 
         <div class="card mb-2 fm-upload-wrapper <?php echo fm_get_theme(); ?>">
@@ -1222,7 +1298,7 @@ if (isset($_GET['upload']) && !FM_READONLY) {
             </div>
         </div>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.5.1/min/dropzone.min.js"></script>
+    <script src="<?php echo $CFG->wwwroot; ?>/local/tinyfilemanager/js/dropzone.min.js"></script>
     <script>
         Dropzone.options.fileUploader = {
             timeout: 120000,
@@ -1585,7 +1661,8 @@ if (isset($_GET['view'])) {
                 <p class="break-word"><b><?php echo $view_title ?> "<?php echo fm_enc(fm_convert_win($file)) ?>"</b></p>
                 <p class="break-word">
                     Full path: <?php echo fm_enc(fm_convert_win($file_path)) ?><br>
-                    File size: <?php echo ($filesize_raw <= 1000) ? "$filesize_raw bytes" : $filesize; ?><br>
+                    File size: <?php echo fm_get_filesize($filesize) ?><?php if ($filesize >= 1000): ?> (<?php echo sprintf('%s bytes', $filesize) ?>)<?php endif; ?>
+                    <br>
                     MIME-type: <?php echo $mime_type ?><br>
                     <?php
                     // ZIP info
@@ -1939,7 +2016,7 @@ $tableTheme = (FM_THEME == "dark") ? "text-white bg-dark table-dark" : "bg-white
                 $is_link = is_link($path . '/' . $f);
                 $img = $is_link ? 'icon-link_folder' : 'fa fa-folder-o';
                 $modif_raw = filemtime($path . '/' . $f);
-                $modif = date(FM_DATETIME_FORMAT, $modif_raw);
+                $modif = userdate($modif_raw, FM_DATETIME_FORMAT);
                 if ($calc_folder) {
                     $filesize_raw = fm_get_directorysize($path . '/' . $f);
                     $filesize = fm_get_filesize($filesize_raw);
@@ -1995,7 +2072,7 @@ $tableTheme = (FM_THEME == "dark") ? "text-white bg-dark table-dark" : "bg-white
                 $is_link = is_link($path . '/' . $f);
                 $img = $is_link ? 'fa fa-file-text-o' : fm_get_file_icon_class($path . '/' . $f);
                 $modif_raw = filemtime($path . '/' . $f);
-                $modif = date(FM_DATETIME_FORMAT, $modif_raw);
+                $modif = userdate($modif_raw, FM_DATETIME_FORMAT);
                 $filesize_raw = fm_get_size($path . '/' . $f);
                 $filesize = fm_get_filesize($filesize_raw);
                 $filelink = '?p=' . urlencode(FM_PATH) . '&amp;view=' . urlencode($f);
@@ -2075,6 +2152,7 @@ $tableTheme = (FM_THEME == "dark") ? "text-white bg-dark table-dark" : "bg-white
                             <?php echo lng('FullSize').': <span class="badge badge-light">'.fm_get_filesize($all_files_size).'</span>' ?>
                             <?php echo lng('File').': <span class="badge badge-light">'.$num_files.'</span>' ?>
                             <?php echo lng('Folder').': <span class="badge badge-light">'.$num_folders.'</span>' ?>
+                            <?php echo lng('MemoryUsed').': <span class="badge badge-light">'.fm_get_filesize(@memory_get_usage(true)).'</span>' ?>
                             <?php echo lng('PartitionSize').': <span class="badge badge-light">'.fm_get_filesize(@disk_free_space($path)) .'</span> '.lng('FreeOf').' <span class="badge badge-light">'.fm_get_filesize(@disk_total_space($path)).'</span>'; ?>
                         </td>
                     </tr>
@@ -2508,7 +2586,7 @@ function fm_get_filesize($size)
 /**
  * Get director total size
  * @param string $directory
- * @return int
+ * @return string
  */
 function fm_get_directorysize($directory) {
     global $calc_folder;
@@ -2521,7 +2599,7 @@ function fm_get_directorysize($directory) {
         }
     else if ($file->isDir()) { $dirCount++; }
     // return [$size, $count, $dirCount];
-    return $size;
+    return fm_get_filesize($size);
     }
     else return 'Folder'; //  Quick output
 }
@@ -3401,12 +3479,12 @@ function fm_show_nav_path($path)
                             <a title="<?php echo lng('Logout') ?>" class="dropdown-item nav-link" href="?logout=1"><i class="fa fa-sign-out" aria-hidden="true"></i> <?php echo lng('Logout') ?></a>
                         </div>
                     </li>
-                    <?php else: ?>
+                    <?php else: /* ?>
                         <?php if (!FM_READONLY): ?>
                             <li class="nav-item">
                                 <a title="<?php echo lng('Settings') ?>" class="dropdown-item nav-link" href="?p=<?php echo urlencode(FM_PATH) ?>&amp;settings=1"><i class="fa fa-cog" aria-hidden="true"></i> <?php echo lng('Settings') ?></a>
                             </li>
-                        <?php endif; ?>
+                        <?php endif; */ ?>
                     <?php endif; ?>
                 </ul>
             </div>
@@ -3429,81 +3507,13 @@ function fm_show_message()
 }
 
 /**
- * Show page header in Login Form
- */
-function fm_show_header_login()
-{
-$sprites_ver = '20160315';
-header("Content-Type: text/html; charset=utf-8");
-header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
-header("Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0");
-header("Pragma: no-cache");
-
-global $lang, $root_url, $favicon_path;
-?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="Web based File Manager in PHP, Manage your files efficiently and easily with Tiny File Manager">
-    <meta name="author" content="CCP Programmers">
-    <meta name="robots" content="noindex, nofollow">
-    <meta name="googlebot" content="noindex">
-    <?php if($favicon_path) { echo '<link rel="icon" href="'.fm_enc($favicon_path).'" type="image/png">'; } ?>
-    <title><?php echo fm_enc(APP_TITLE) ?></title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <style>
-        body.fm-login-page{ background-color:#f7f9fb;font-size:14px;background-color:#f7f9fb;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 304 304' width='304' height='304'%3E%3Cpath fill='%23e2e9f1' fill-opacity='0.4' d='M44.1 224a5 5 0 1 1 0 2H0v-2h44.1zm160 48a5 5 0 1 1 0 2H82v-2h122.1zm57.8-46a5 5 0 1 1 0-2H304v2h-42.1zm0 16a5 5 0 1 1 0-2H304v2h-42.1zm6.2-114a5 5 0 1 1 0 2h-86.2a5 5 0 1 1 0-2h86.2zm-256-48a5 5 0 1 1 0 2H0v-2h12.1zm185.8 34a5 5 0 1 1 0-2h86.2a5 5 0 1 1 0 2h-86.2zM258 12.1a5 5 0 1 1-2 0V0h2v12.1zm-64 208a5 5 0 1 1-2 0v-54.2a5 5 0 1 1 2 0v54.2zm48-198.2V80h62v2h-64V21.9a5 5 0 1 1 2 0zm16 16V64h46v2h-48V37.9a5 5 0 1 1 2 0zm-128 96V208h16v12.1a5 5 0 1 1-2 0V210h-16v-76.1a5 5 0 1 1 2 0zm-5.9-21.9a5 5 0 1 1 0 2H114v48H85.9a5 5 0 1 1 0-2H112v-48h12.1zm-6.2 130a5 5 0 1 1 0-2H176v-74.1a5 5 0 1 1 2 0V242h-60.1zm-16-64a5 5 0 1 1 0-2H114v48h10.1a5 5 0 1 1 0 2H112v-48h-10.1zM66 284.1a5 5 0 1 1-2 0V274H50v30h-2v-32h18v12.1zM236.1 176a5 5 0 1 1 0 2H226v94h48v32h-2v-30h-48v-98h12.1zm25.8-30a5 5 0 1 1 0-2H274v44.1a5 5 0 1 1-2 0V146h-10.1zm-64 96a5 5 0 1 1 0-2H208v-80h16v-14h-42.1a5 5 0 1 1 0-2H226v18h-16v80h-12.1zm86.2-210a5 5 0 1 1 0 2H272V0h2v32h10.1zM98 101.9V146H53.9a5 5 0 1 1 0-2H96v-42.1a5 5 0 1 1 2 0zM53.9 34a5 5 0 1 1 0-2H80V0h2v34H53.9zm60.1 3.9V66H82v64H69.9a5 5 0 1 1 0-2H80V64h32V37.9a5 5 0 1 1 2 0zM101.9 82a5 5 0 1 1 0-2H128V37.9a5 5 0 1 1 2 0V82h-28.1zm16-64a5 5 0 1 1 0-2H146v44.1a5 5 0 1 1-2 0V18h-26.1zm102.2 270a5 5 0 1 1 0 2H98v14h-2v-16h124.1zM242 149.9V160h16v34h-16v62h48v48h-2v-46h-48v-66h16v-30h-16v-12.1a5 5 0 1 1 2 0zM53.9 18a5 5 0 1 1 0-2H64V2H48V0h18v18H53.9zm112 32a5 5 0 1 1 0-2H192V0h50v2h-48v48h-28.1zm-48-48a5 5 0 0 1-9.8-2h2.07a3 3 0 1 0 5.66 0H178v34h-18V21.9a5 5 0 1 1 2 0V32h14V2h-58.1zm0 96a5 5 0 1 1 0-2H137l32-32h39V21.9a5 5 0 1 1 2 0V66h-40.17l-32 32H117.9zm28.1 90.1a5 5 0 1 1-2 0v-76.51L175.59 80H224V21.9a5 5 0 1 1 2 0V82h-49.59L146 112.41v75.69zm16 32a5 5 0 1 1-2 0v-99.51L184.59 96H300.1a5 5 0 0 1 3.9-3.9v2.07a3 3 0 0 0 0 5.66v2.07a5 5 0 0 1-3.9-3.9H185.41L162 121.41v98.69zm-144-64a5 5 0 1 1-2 0v-3.51l48-48V48h32V0h2v50H66v55.41l-48 48v2.69zM50 53.9v43.51l-48 48V208h26.1a5 5 0 1 1 0 2H0v-65.41l48-48V53.9a5 5 0 1 1 2 0zm-16 16V89.41l-34 34v-2.82l32-32V69.9a5 5 0 1 1 2 0zM12.1 32a5 5 0 1 1 0 2H9.41L0 43.41V40.6L8.59 32h3.51zm265.8 18a5 5 0 1 1 0-2h18.69l7.41-7.41v2.82L297.41 50H277.9zm-16 160a5 5 0 1 1 0-2H288v-71.41l16-16v2.82l-14 14V210h-28.1zm-208 32a5 5 0 1 1 0-2H64v-22.59L40.59 194H21.9a5 5 0 1 1 0-2H41.41L66 216.59V242H53.9zm150.2 14a5 5 0 1 1 0 2H96v-56.6L56.6 162H37.9a5 5 0 1 1 0-2h19.5L98 200.6V256h106.1zm-150.2 2a5 5 0 1 1 0-2H80v-46.59L48.59 178H21.9a5 5 0 1 1 0-2H49.41L82 208.59V258H53.9zM34 39.8v1.61L9.41 66H0v-2h8.59L32 40.59V0h2v39.8zM2 300.1a5 5 0 0 1 3.9 3.9H3.83A3 3 0 0 0 0 302.17V256h18v48h-2v-46H2v42.1zM34 241v63h-2v-62H0v-2h34v1zM17 18H0v-2h16V0h2v18h-1zm273-2h14v2h-16V0h2v16zm-32 273v15h-2v-14h-14v14h-2v-16h18v1zM0 92.1A5.02 5.02 0 0 1 6 97a5 5 0 0 1-6 4.9v-2.07a3 3 0 1 0 0-5.66V92.1zM80 272h2v32h-2v-32zm37.9 32h-2.07a3 3 0 0 0-5.66 0h-2.07a5 5 0 0 1 9.8 0zM5.9 0A5.02 5.02 0 0 1 0 5.9V3.83A3 3 0 0 0 3.83 0H5.9zm294.2 0h2.07A3 3 0 0 0 304 3.83V5.9a5 5 0 0 1-3.9-5.9zm3.9 300.1v2.07a3 3 0 0 0-1.83 1.83h-2.07a5 5 0 0 1 3.9-3.9zM97 100a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm0-16a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm16 16a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm16 16a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm0 16a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm-48 32a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm16 16a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm32 48a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm-16 16a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm32-16a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm0-32a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm16 32a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm32 16a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm0-16a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm-16-64a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm16 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm16 96a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm0 16a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm16 16a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm16-144a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm0 32a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm16-32a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm16-16a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm-96 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm0 16a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm16-32a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm96 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm-16-64a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm16-16a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm-32 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm0-16a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm-16 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm-16 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm-16 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM49 36a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm-32 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm32 16a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM33 68a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm16-48a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm0 240a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm16 32a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm-16-64a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm0 16a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm-16-32a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm80-176a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm16 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm-16-16a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm32 48a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm16-16a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm0-32a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm112 176a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm-16 16a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm0 16a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm0 16a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM17 180a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm0 16a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm0-32a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm16 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM17 84a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm32 64a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm16-16a3 3 0 1 0 0-6 3 3 0 0 0 0 6z'%3E%3C/path%3E%3C/svg%3E");}
-        .fm-login-page .brand{ width:121px;overflow:hidden;margin:0 auto;position:relative;z-index:1}
-        .fm-login-page .brand img{ width:100%}
-        .fm-login-page .card-wrapper{ width:360px;margin-top:10%;margin-left:auto;margin-right:auto;}
-        .fm-login-page .card{ border-color:transparent;box-shadow:0 4px 8px rgba(0,0,0,.05)}
-        .fm-login-page .card-title{ margin-bottom:1.5rem;font-size:24px;font-weight:400;}
-        .fm-login-page .form-control{ border-width:2.3px}
-        .fm-login-page .form-group label{ width:100%}
-        .fm-login-page .btn.btn-block{ padding:12px 10px}
-        .fm-login-page .footer{ margin:40px 0;color:#888;text-align:center}
-        @media screen and (max-width:425px){
-            .fm-login-page .card-wrapper{ width:90%;margin:0 auto;margin-top:10%;}
-        }
-        @media screen and (max-width:320px){
-            .fm-login-page .card.fat{ padding:0}
-            .fm-login-page .card.fat .card-body{ padding:15px}
-        }
-        .message{ padding:4px 7px;border:1px solid #ddd;background-color:#fff}
-        .message.ok{ border-color:green;color:green}
-        .message.error{ border-color:red;color:red}
-        .message.alert{ border-color:orange;color:orange}
-        body.fm-login-page.theme-dark {background-color: #2f2a2a;}
-        .theme-dark svg g, .theme-dark svg path {fill: #ffffff; }
-    </style>
-</head>
-<body class="fm-login-page <?php echo (FM_THEME == "dark") ? 'theme-dark' : ''; ?>">
-<div id="wrapper" class="container-fluid">
-
-    <?php
-    }
-
-    /**
-     * Show page footer in Login Form
-     */
-    function fm_show_footer_login()
-    {
-    ?>
-</div>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.slim.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
-</body>
-</html>
-<?php
-}
-
-/**
  * Show Header after login
  */
-function fm_show_header()
-{
+function fm_show_header() {
+    global $OUTPUT;
+    echo $OUTPUT->header();
+    return;
+
 $sprites_ver = '20160315';
 header("Content-Type: text/html; charset=utf-8");
 header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
@@ -3910,6 +3920,7 @@ $isStickyNavBar = $sticky_navbar ? 'navbar-fixed' : 'navbar-normal';
     //on mouse hover image preview
     !function(s){s.previewImage=function(e){var o=s(document),t=".previewImage",a=s.extend({xOffset:20,yOffset:-20,fadeIn:"fast",css:{padding:"5px",border:"1px solid #cccccc","background-color":"#fff"},eventSelector:"[data-preview-image]",dataKey:"previewImage",overlayId:"preview-image-plugin-overlay"},e);return o.off(t),o.on("mouseover"+t,a.eventSelector,function(e){s("p#"+a.overlayId).remove();var o=s("<p>").attr("id",a.overlayId).css("position","absolute").css("display","none").append(s('<img class="c-preview-img">').attr("src",s(this).data(a.dataKey)));a.css&&o.css(a.css),s("body").append(o),o.css("top",e.pageY+a.yOffset+"px").css("left",e.pageX+a.xOffset+"px").fadeIn(a.fadeIn)}),o.on("mouseout"+t,a.eventSelector,function(){s("#"+a.overlayId).remove()}),o.on("mousemove"+t,a.eventSelector,function(e){s("#"+a.overlayId).css("top",e.pageY+a.yOffset+"px").css("left",e.pageX+a.xOffset+"px")}),this},s.previewImage()}(jQuery);
 
+
     // Dom Ready Event
     $(document).ready( function () {
         //load config
@@ -3995,10 +4006,51 @@ $isStickyNavBar = $sticky_navbar ? 'navbar-fixed' : 'navbar-normal';
     </script>
 <?php endif; ?>
 <div id="snackbar"></div>
-</body>
-</html>
+
 <?php
 }
+// Display page footer.
+echo $OUTPUT->footer();
+
+/**
+ * Show image
+ * @param string $img
+ */
+function fm_show_image($img)
+{
+    $modified_time = gmdate('D, d M Y 00:00:00') . ' GMT';
+    $expires_time = gmdate('D, d M Y 00:00:00', strtotime('+1 day')) . ' GMT';
+
+    $img = trim($img);
+    $images = fm_get_images();
+    $image = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAEElEQVR42mL4//8/A0CAAQAI/AL+26JNFgAAAABJRU5ErkJggg==';
+    if (isset($images[$img])) {
+        $image = $images[$img];
+    }
+    $image = base64_decode($image);
+    if (function_exists('mb_strlen')) {
+        $size = mb_strlen($image, '8bit');
+    } else {
+        $size = strlen($image);
+    }
+
+    if (function_exists('header_remove')) {
+        header_remove('Cache-Control');
+        header_remove('Pragma');
+    } else {
+        header('Cache-Control:');
+        header('Pragma:');
+    }
+
+    header('Last-Modified: ' . $modified_time, true, 200);
+    header('Expires: ' . $expires_time);
+    header('Content-Length: ' . $size);
+    header('Content-Type: image/png');
+    echo $image;
+
+    exit;
+}
+
 
 /**
  * Language Translation System
@@ -4047,6 +4099,7 @@ function lng($txt) {
     $tr['en']['Check Latest Version'] = 'Check Latest Version';$tr['en']['Generate new password hash'] = 'Generate new password hash';
     $tr['en']['Login failed. Invalid username or password'] = 'Login failed. Invalid username or password';
     $tr['en']['password_hash not supported, Upgrade PHP version'] = 'password_hash not supported, Upgrade PHP version';
+    $tr['en']['MemoryUsed']     = 'Memory used';
     
     // new - novos
     
@@ -4084,6 +4137,23 @@ function lng($txt) {
     if (isset($tr[$lang][$txt])) return fm_enc($tr[$lang][$txt]);
     else if (isset($tr['en'][$txt])) return fm_enc($tr['en'][$txt]);
     else return "$txt";
+}
+
+/**
+ * Get base64-encoded images
+ * @return array
+ */
+function fm_get_images()
+{
+    return array(
+        'favicon' => 'Qk04AgAAAAAAADYAAAAoAAAAEAAAABAAAAABABAAAAAAAAICAAASCwAAEgsAAAAAAAAAAAAAIQQhBCEEIQQhBCEEIQQhBCEEIQ
+        QhBCEEIQQhBCEEIQQhBCEEIQQhBHNO3n/ef95/vXetNSEEIQQhBCEEIQQhBCEEIQQhBCEEc07ef95/3n/ef95/1lohBCEEIQQhBCEEIQQhBCEEIQ
+        RzTt5/3n8hBDFG3n/efyEEIQQhBCEEIQQhBCEEIQQhBHNO3n/efyEEMUbef95/IQQhBCEEIQQhBCEEIQQhBCEErTVzTnNOIQQxRt5/3n8hBCEEIQ
+        QhBCEEIQQhBCEEIQQhBCEEIQQhBDFG3n/efyEEIQQhBCEEIQQhBCEEIQQhBCEEIQQxRt5/3n+cc2stIQQhBCEEIQQhBCEEIQQhBCEEIQQIIZxz3n
+        /ef5xzay0hBCEEIQQhBCEEIQQhBCEEIQQhBCEEIQQhBDFG3n/efyEEIQQhBCEEIQQhBCEEIQQhBK01c05zTiEEMUbef95/IQQhBCEEIQQhBCEEIQ
+        QhBCEEc07ef95/IQQxRt5/3n8hBCEEIQQhBCEEIQQhBCEEIQRzTt5/3n8hBDFG3n/efyEEIQQhBCEEIQQhBCEEIQQhBKUUOWfef95/3n/ef95/IQ
+        QhBCEEIQQhBCEEIQQhBCEEIQQhBJRW3n/ef95/3n8hBCEEIQQhBCEEIQQhBCEEIQQhBCEEIQQhBCEEIQQhBCEEIQQhBCEEIQQAAA=='
+    );
 }
 
 ?>
