@@ -28,25 +28,45 @@ $CONFIG = '{"lang":"en","error_reporting":true,"show_hidden":false,"hide_Cols":f
 
 require_once(dirname(__FILE__) . '/../../config.php');
 
+$rooturl = $CFG->wwwroot . '/local/tinyfilemanager/';
 $context = context_system::instance();
 $PAGE->set_context($context);
 $PAGE->set_heading($SITE->fullname);
 $PAGE->set_pagelayout('standard');
 $PAGE->set_title(get_string('pluginname', 'local_tinyfilemanager'));
-$PAGE->set_url($CFG->wwwroot . '/local/tinyfilemanager/index.php');
-$PAGE->navbar->add(get_string('pluginname', 'local_tinyfilemanager'));
+$PAGE->set_url($rooturl);
+
+// Create breadcrumbs.
+// Link to Tiny File Manager is the home directory.
+$PAGE->navbar->add(get_string('administrationsite'), $CFG->wwwroot . '/admin/search.php');
+$PAGE->navbar->add(get_string('pluginname', 'local_tinyfilemanager'), $rooturl);
+// Get current path from URL.
+$path = isset($_GET['p']) ? $_GET['p'] : (isset($_POST['p']) ? $_POST['p'] : '');
+if (!empty($path != '')) {
+    $exploded = explode('/', $path);
+    $count = count($exploded);
+    $array = array();
+    $parent = '';
+    for ($i = 0; $i < $count; $i++) {
+        $parent = trim($parent . '/' . $exploded[$i], '/');
+        $parent_enc = urlencode($parent);
+        $PAGE->navbar->add(fm_enc(fm_convert_win($exploded[$i])), $rooturl . "?p={$parent_enc}");
+    }
+}
 
 // We require Admin to be logged in.
 require_login(0, false);
 if (!is_siteadmin()) {
-    // Set message that session has timed out.
+    // Access denied. Only available to Moodle Administrators.
     $SESSION->has_timed_out = 1;
     header('HTTP/1.0 403 Forbidden');
     die(get_string('accessdenied', 'admin'));
 }
 
-//Default Configuration
-$CONFIG = '{"lang":"en","error_reporting":true,"show_hidden":true,"hide_Cols":false,"calc_folder":false,"theme":"light"}';
+// Default Configuration
+// Default language
+$lang = strtolower(substr(current_language(), 0, 2));
+$CONFIG = '{"lang":"' . $lang . '","error_reporting":' . $CFG->debugdisplay . ',"show_hidden":true,"hide_Cols":false,"calc_folder":false,"theme":"light"}';
 
 /**
  * H3K | Tiny File Manager V2.4.6
@@ -62,9 +82,9 @@ define('VERSION', '2.4.6');
 //
 // Application Title
 define('APP_TITLE', 'Tiny File Manager');
-define('FM_EMBED', 1);
+define('FM_EMBED', true);
 define('FM_ROOT_URL', $CFG->wwwroot);
-define('FM_SELF_URL', $CFG->wwwroot . '/local/tinyfilemanager/index.php');
+define('FM_SELF_URL', $CFG->wwwroot . '/local/tinyfilemanager/');
 define('FM_DATETIME_FORMAT', get_string('strftimedatetimeshort', 'core_langconfig'));
 define('FM_LOCKSETTINGS', 1);
 unset($_GET['settings']); // Disable built-in settings.
@@ -138,11 +158,6 @@ $allowed_file_extensions = '';
 // e.g. 'gif,png,jpg,html,txt'
 $allowed_upload_extensions = '';
 
-// Favicon path. This can be either a full url to an .PNG image, or a path based on the document root.
-// full path, e.g http://example.com/favicon.png
-// local path, e.g images/icons/favicon.png
-$favicon_path = '?img=favicon';
-
 // Files and folders to excluded from listing
 // e.g. array('myfile.html', 'personal-folder', '*.php', ...)
 $exclude_items = array();
@@ -157,7 +172,7 @@ $online_viewer = 'google';
 // Sticky Nav bar
 // true => enable sticky header
 // false => disable sticky header
-$sticky_navbar = true;
+$sticky_navbar = false;
 
 // Maximum file upload size
 // Increase the following values in php.ini to work properly
@@ -213,9 +228,6 @@ if ( !defined( 'FM_SESSION_ID')) {
 
 // Configuration
 $cfg = new FM_Config();
-
-// Default language
-$lang = strtolower(substr(current_language(), 0, 2));
 
 // Show or hide files and folders that starts with a dot
 $show_hidden_files = isset($cfg->data['show_hidden']) ? $cfg->data['show_hidden'] : true;
@@ -339,91 +351,6 @@ if($ip_ruleset != 'OFF'){
         }
 
         exit();
-    }
-}
-
-// Auth
-if ($use_auth) {
-    if (isset($_SESSION[FM_SESSION_ID]['logged'], $auth_users[$_SESSION[FM_SESSION_ID]['logged']])) {
-        // Logged
-    } elseif (isset($_POST['fm_usr'], $_POST['fm_pwd'])) {
-        // Logging In
-        sleep(1);
-        if(function_exists('password_verify')) {
-            if (isset($auth_users[$_POST['fm_usr']]) && isset($_POST['fm_pwd']) && password_verify($_POST['fm_pwd'], $auth_users[$_POST['fm_usr']])) {
-                $_SESSION[FM_SESSION_ID]['logged'] = $_POST['fm_usr'];
-                fm_set_msg(lng('You are logged in'));
-                fm_redirect(FM_SELF_URL . '?p=');
-            } else {
-                unset($_SESSION[FM_SESSION_ID]['logged']);
-                fm_set_msg(lng('Login failed. Invalid username or password'), 'error');
-                fm_redirect(FM_SELF_URL);
-            }
-        } else {
-            fm_set_msg(lng('password_hash not supported, Upgrade PHP version'), 'error');;
-        }
-    } else {
-        // Form
-        unset($_SESSION[FM_SESSION_ID]['logged']);
-
-        // Display page header.
-        echo $OUTPUT->header();
-        ?>
-        <section class="h-100">
-            <div class="container h-100">
-                <div class="row justify-content-md-center h-100">
-                    <div class="card-wrapper">
-                        <div class="card fat <?php echo fm_get_theme(); ?>">
-                            <div class="card-body">
-                                <form class="form-signin" action="" method="post" autocomplete="off">
-                                    <div class="form-group">
-                                       <div class="brand">
-                                            <svg version="1.0" xmlns="http://www.w3.org/2000/svg" M1008 width="100%" height="80px" viewBox="0 0 238.000000 140.000000" aria-label="H3K Tiny File Manager">
-                                                <g transform="translate(0.000000,140.000000) scale(0.100000,-0.100000)" fill="#000000" stroke="none">
-                                                    <path d="M160 700 l0 -600 110 0 110 0 0 260 0 260 70 0 70 0 0 -260 0 -260 110 0 110 0 0 600 0 600 -110 0 -110 0 0 -260 0 -260 -70 0 -70 0 0 260 0 260 -110 0 -110 0 0 -600z"/>
-                                                    <path fill="#003500" d="M1008 1227 l-108 -72 0 -117 0 -118 110 0 110 0 0 110 0 110 70 0 70 0 0 -180 0 -180 -125 0 c-69 0 -125 -3 -125 -6 0 -3 23 -39 52 -80 l52 -74 73 0 73 0 0 -185 0 -185 -70 0 -70 0 0 115 0 115 -110 0 -110 0 0 -190 0 -190 181 0 181 0 109 73 108 72 1 181 0 181 -69 48 -68 49 68 50 69 49 0 249 0 248 -182 -1 -183 0 -107 -72z"/>
-                                                    <path d="M1640 700 l0 -600 110 0 110 0 0 208 0 208 35 34 35 34 35 -34 35 -34 0 -208 0 -208 110 0 110 0 0 212 0 213 -87 87 -88 88 88 88 87 87 0 213 0 212 -110 0 -110 0 0 -208 0 -208 -70 -69 -70 -69 0 277 0 277 -110 0 -110 0 0 -600z"/></g>
-                                            </svg>
-                                        </div>
-                                        <div class="text-center">
-                                            <h1 class="card-title"><?php echo APP_TITLE; ?></h1>
-                                        </div>
-                                    </div>
-                                    <hr />
-                                    <div class="form-group">
-                                        <label for="fm_usr"><?php echo lng('Username'); ?></label>
-                                        <input type="text" class="form-control" id="fm_usr" name="fm_usr" required autofocus>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label for="fm_pwd"><?php echo lng('Password'); ?></label>
-                                        <input type="password" class="form-control" id="fm_pwd" name="fm_pwd" required>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <?php fm_show_message(); ?>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <button type="submit" class="btn btn-success btn-block mt-4" role="button">
-                                            <?php echo lng('Login'); ?>
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                        <div class="footer text-center">
-                            &mdash;&mdash; &copy;
-                            <a href="https://tinyfilemanager.github.io/" target="_blank" class="text-muted" data-version="<?php echo VERSION; ?>">CCP Programmers</a> &mdash;&mdash;
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <?php
-        echo $OUTPUT->footer();
-        exit;
     }
 }
 
@@ -1416,130 +1343,6 @@ if (isset($_GET['copy']) && !isset($_GET['finish']) && !FM_READONLY) {
     exit;
 }
 
-if (isset($_GET['settings']) && !FM_READONLY) {
-    fm_show_header(); // HEADER
-    fm_show_nav_path(FM_PATH); // current path
-    global $cfg, $lang, $lang_list;
-    ?>
-
-    <div class="col-md-8 offset-md-2 pt-3">
-        <div class="card mb-2 <?php echo fm_get_theme(); ?>">
-            <h6 class="card-header">
-                <i class="fa fa-cog"></i>  <?php echo lng('Settings') ?>
-                <a href="?p=<?php echo FM_PATH ?>" class="float-right"><i class="fa fa-window-close"></i> <?php echo lng('Cancel')?></a>
-            </h6>
-            <div class="card-body">
-                <form id="js-settings-form" action="" method="post" data-type="ajax" onsubmit="return save_settings(this)">
-                    <input type="hidden" name="type" value="settings" aria-label="hidden" aria-hidden="true">
-                    <div class="form-group row">
-                        <label for="js-language" class="col-sm-3 col-form-label"><?php echo lng('Language') ?></label>
-                        <div class="col-sm-5">
-                            <select class="form-control" id="js-language" name="js-language">
-                                <?php
-                                function getSelected($l) {
-                                    global $lang;
-                                    return ($lang == $l) ? 'selected' : '';
-                                }
-                                foreach ($lang_list as $k => $v) {
-                                    echo "<option value='$k' ".getSelected($k).">$v</option>";
-                                }
-                                ?>
-                            </select>
-                        </div>
-                    </div>
-                    <?php
-                    //get ON/OFF and active class
-                    function getChecked($conf, $val, $txt) {
-                        if($conf== 1 && $val ==1) {
-                            return $txt;
-                        } else if($conf == '' && $val == '') {
-                            return $txt;
-                        } else {
-                            return '';
-                        }
-                    }
-                    ?>
-                    <div class="form-group row">
-                        <label for="js-err-rpt-1" class="col-sm-3 col-form-label"><?php echo lng('ErrorReporting') ?></label>
-                        <div class="col-sm-9">
-                            <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                                <label class="btn btn-secondary <?php echo getChecked($report_errors, 1, 'active') ?>">
-                                    <input type="radio" name="js-error-report" id="js-err-rpt-1" autocomplete="off" value="true" <?php echo getChecked($report_errors, 1, 'checked') ?> > ON
-                                </label>
-                                <label class="btn btn-secondary <?php echo getChecked($report_errors, '', 'active') ?>">
-                                    <input type="radio" name="js-error-report" id="js-err-rpt-0" autocomplete="off" value="false" <?php echo getChecked($report_errors, '', 'checked') ?> > OFF
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group row">
-                        <label for="js-hdn-1" class="col-sm-3 col-form-label"><?php echo lng('ShowHiddenFiles') ?></label>
-                        <div class="col-sm-9">
-                            <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                                <label class="btn btn-secondary <?php echo getChecked($show_hidden_files, 1, 'active') ?>">
-                                    <input type="radio" name="js-show-hidden" id="js-hdn-1" autocomplete="off" value="true" <?php echo getChecked($show_hidden_files, 1, 'checked') ?> > ON
-                                </label>
-                                <label class="btn btn-secondary <?php echo getChecked($show_hidden_files, '', 'active') ?>">
-                                    <input type="radio" name="js-show-hidden" id="js-hdn-0" autocomplete="off" value="false" <?php echo getChecked($show_hidden_files, '', 'checked') ?> > OFF
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group row">
-                        <label for="js-hid-1" class="col-sm-3 col-form-label"><?php echo lng('HideColumns') ?></label>
-                        <div class="col-sm-9">
-                            <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                                <label class="btn btn-secondary <?php echo getChecked($hide_Cols, 1, 'active') ?>">
-                                    <input type="radio" name="js-hide-cols" id="js-hid-1" autocomplete="off" value="true" <?php echo getChecked($hide_Cols, 1, 'checked') ?> > ON
-                                </label>
-                                <label class="btn btn-secondary <?php echo getChecked($hide_Cols, '', 'active') ?>">
-                                    <input type="radio" name="js-hide-cols" id="js-hid-0" autocomplete="off" value="false" <?php echo getChecked($hide_Cols, '', 'checked') ?> > OFF
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group row">
-                        <label for="js-dir-1" class="col-sm-3 col-form-label"><?php echo lng('CalculateFolderSize') ?></label>
-                        <div class="col-sm-9">
-                            <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                                <label class="btn btn-secondary <?php echo getChecked($calc_folder, 1, 'active') ?>">
-                                    <input type="radio" name="js-calc-folder" id="js-dir-1" autocomplete="off" value="true" <?php echo getChecked($calc_folder, 1, 'checked') ?> > ON
-                                </label>
-                                <label class="btn btn-secondary <?php echo getChecked($calc_folder, '', 'active') ?>">
-                                    <input type="radio" name="js-calc-folder" id="js-dir-0" autocomplete="off" value="false" <?php echo getChecked($calc_folder, '', 'checked') ?> > OFF
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group row">
-                        <label for="js-3-1" class="col-sm-3 col-form-label"><?php echo lng('Theme') ?></label>
-                        <div class="col-sm-5">
-                            <select class="form-control" id="js-3-0" name="js-theme-3" style="width:100px;">
-                         <option value='light' <?php if($theme == "light"){echo "selected";} ?>><?php echo lng('light') ?></option>
-                         <option value='dark' <?php if($theme == "dark"){echo "selected";} ?>><?php echo lng('dark') ?></option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-group row">
-                        <div class="col-sm-10">
-                            <button type="submit" class="btn btn-success"> <i class="fa fa-check-circle"></i> <?php echo lng('Save'); ?></button>
-                        </div>
-                    </div>
-
-                </form>
-            </div>
-        </div>
-    </div>
-    <?php
-    fm_show_footer();
-    exit;
-}
-
 if (isset($_GET['help'])) {
     fm_show_header(); // HEADER
     fm_show_nav_path(FM_PATH); // current path
@@ -1694,7 +1497,7 @@ if (isset($_GET['view'])) {
                         $is_utf8 = fm_is_utf8($content);
                         if (function_exists('iconv')) {
                             if (!$is_utf8) {
-                                $content = iconv(FM_ICONV_INPUT_ENC, 'UTF-8//IGNORE', $content);
+                                $content = iconv('UTF-8', 'UTF-8//IGNORE', $content);
                             }
                         }
                         echo 'Charset: ' . ($is_utf8 ? 'utf-8' : '8 bit') . '<br>';
@@ -1965,11 +1768,10 @@ fm_show_nav_path(FM_PATH); // current path
 
 // messages
 fm_show_message();
-
 $num_files = count($files);
 $num_folders = count($folders);
 $all_files_size = 0;
-$tableTheme = (FM_THEME == "dark") ? "text-white bg-dark table-dark" : "bg-white";
+$tableTheme = "bg-white";
 ?>
 <form action="" method="post" class="pt-3">
     <input type="hidden" name="p" value="<?php echo fm_enc(FM_PATH) ?>">
@@ -2696,8 +2498,8 @@ function fm_is_utf8($string)
  */
 function fm_convert_win($filename)
 {
-    if (FM_IS_WIN && function_exists('iconv')) {
-        $filename = iconv(FM_ICONV_INPUT_ENC, 'UTF-8//IGNORE', $filename);
+    if (DIRECTORY_SEPARATOR == '\\' && function_exists('iconv')) {
+        $filename = iconv('UTF-8', 'UTF-8//IGNORE', $filename);
     }
     return $filename;
 }
@@ -3411,39 +3213,13 @@ function fm_show_nav_path($path)
     global $lang, $sticky_navbar;
     $isStickyNavBar = $sticky_navbar ? 'fixed-top' : '';
     $getTheme = fm_get_theme();
-    $getTheme .= " navbar-light";
-    if(FM_THEME == "dark") {
-        $getTheme .= " navbar-dark";
-    } else {
-        $getTheme .= " bg-white";
-    }
+    $getTheme .= " navbar-light bg-white";
     ?>
-    <nav class="navbar navbar-expand-lg <?php echo $getTheme; ?> mb-4 main-nav <?php echo $isStickyNavBar ?>">
-        <a class="navbar-brand" href=""> <?php echo lng('AppTitle') ?> </a>
+    <nav class="navbar navbar-expand-lg <?php echo $getTheme; ?> mb-4 main-nav <?php echo $isStickyNavBar ?> position-relative">
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
-
-            <?php
-            $path = fm_clean_path($path);
-            $root_url = "<a href='?p='><i class='fa fa-home' aria-hidden='true' title='" . FM_ROOT_PATH . "'></i></a>";
-            $sep = '<i class="bread-crumb"> / </i>';
-            if ($path != '') {
-                $exploded = explode('/', $path);
-                $count = count($exploded);
-                $array = array();
-                $parent = '';
-                for ($i = 0; $i < $count; $i++) {
-                    $parent = trim($parent . '/' . $exploded[$i], '/');
-                    $parent_enc = urlencode($parent);
-                    $array[] = "<a href='?p={$parent_enc}'>" . fm_enc(fm_convert_win($exploded[$i])) . "</a>";
-                }
-                $root_url .= $sep . implode($sep, $array);
-            }
-            echo '<div class="col-xs-6 col-sm-5">' . $root_url . '</div>';
-            ?>
-
             <div class="col-xs-6 col-sm-7 text-right">
                 <ul class="navbar-nav mr-auto float-right <?php echo fm_get_theme();  ?>">
                     <li class="nav-item mr-2">
@@ -3512,165 +3288,7 @@ function fm_show_message()
 function fm_show_header() {
     global $OUTPUT;
     echo $OUTPUT->header();
-    return;
-
-$sprites_ver = '20160315';
-header("Content-Type: text/html; charset=utf-8");
-header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
-header("Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0");
-header("Pragma: no-cache");
-
-global $lang, $root_url, $sticky_navbar, $favicon_path;
-$isStickyNavBar = $sticky_navbar ? 'navbar-fixed' : 'navbar-normal';
-?>
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="Web based File Manager in PHP, Manage your files efficiently and easily with Tiny File Manager">
-    <meta name="author" content="CCP Programmers">
-    <meta name="robots" content="noindex, nofollow">
-    <meta name="googlebot" content="noindex">
-    <?php if($favicon_path) { echo '<link rel="icon" href="'.fm_enc($favicon_path).'" type="image/png">'; } ?>
-    <title><?php echo fm_enc(APP_TITLE) ?></title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.css" />
-    <?php if (FM_USE_HIGHLIGHTJS): ?>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.6.0/styles/<?php echo FM_HIGHLIGHTJS_STYLE ?>.min.css">
-    <?php endif; ?>
-    <style>
-        body { font-size:14px;color:#222;background:#F7F7F7; }
-        body.navbar-fixed { margin-top:55px; }
-        a:hover, a:visited, a:focus { text-decoration:none !important; }
-        * { -webkit-border-radius:0 !important;-moz-border-radius:0 !important;border-radius:0 !important; }
-        .filename, td, th { white-space:nowrap  }
-        .navbar-brand { font-weight:bold; }
-        .nav-item.avatar a { cursor:pointer;text-transform:capitalize; }
-        .nav-item.avatar a > i { font-size:15px; }
-        .nav-item.avatar .dropdown-menu a { font-size:13px; }
-        #search-addon { font-size:12px;border-right-width:0; }
-        #search-addon2 { background:transparent;border-left:0; }
-        .bread-crumb { color:#cccccc;font-style:normal; }
-        #main-table .filename a { color:#222222; }
-        .table td, .table th { vertical-align:middle !important; }
-        .table .custom-checkbox-td .custom-control.custom-checkbox, .table .custom-checkbox-header .custom-control.custom-checkbox { min-width:18px; }
-        .table-sm td, .table-sm th { padding:.4rem; }
-        .table-bordered td, .table-bordered th { border:1px solid #f1f1f1; }
-        .hidden { display:none  }
-        pre.with-hljs { padding:0  }
-        pre.with-hljs code { margin:0;border:0;overflow:visible  }
-        code.maxheight, pre.maxheight { max-height:512px  }
-        .fa.fa-caret-right { font-size:1.2em;margin:0 4px;vertical-align:middle;color:#ececec  }
-        .fa.fa-home { font-size:1.3em;vertical-align:bottom  }
-        .path { margin-bottom:10px  }
-        form.dropzone { min-height:200px;border:2px dashed #007bff;line-height:6rem; }
-        .right { text-align:right  }
-        .center, .close, .login-form { text-align:center  }
-        .message { padding:4px 7px;border:1px solid #ddd;background-color:#fff  }
-        .message.ok { border-color:green;color:green  }
-        .message.error { border-color:red;color:red  }
-        .message.alert { border-color:orange;color:orange  }
-        .preview-img { max-width:100%;background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAKklEQVR42mL5//8/Azbw+PFjrOJMDCSCUQ3EABZc4S0rKzsaSvTTABBgAMyfCMsY4B9iAAAAAElFTkSuQmCC)  }
-        .inline-actions > a > i { font-size:1em;margin-left:5px;background:#3785c1;color:#fff;padding:3px;border-radius:3px  }
-        .preview-video { position:relative;max-width:100%;height:0;padding-bottom:62.5%;margin-bottom:10px  }
-        .preview-video video { position:absolute;width:100%;height:100%;left:0;top:0;background:#000  }
-        .compact-table { border:0;width:auto  }
-        .compact-table td, .compact-table th { width:100px;border:0;text-align:center  }
-        .compact-table tr:hover td { background-color:#fff  }
-        .filename { max-width:420px;overflow:hidden;text-overflow:ellipsis  }
-        .break-word { word-wrap:break-word;margin-left:30px  }
-        .break-word.float-left a { color:#7d7d7d  }
-        .break-word + .float-right { padding-right:30px;position:relative  }
-        .break-word + .float-right > a { color:#7d7d7d;font-size:1.2em;margin-right:4px  }
-        #editor { position:absolute;right:15px;top:100px;bottom:15px;left:15px  }
-        @media (max-width:481px) {
-            #editor { top:150px; }
-        }
-        #normal-editor { border-radius:3px;border-width:2px;padding:10px;outline:none; }
-        .btn-2 { border-radius:0;padding:3px 6px;font-size:small; }
-        li.file:before,li.folder:before { font:normal normal normal 14px/1 FontAwesome;content:"\f016";margin-right:5px }
-        li.folder:before { content:"\f114" }
-        i.fa.fa-folder-o { color:#0157b3 }
-        i.fa.fa-picture-o { color:#26b99a }
-        i.fa.fa-file-archive-o { color:#da7d7d }
-        .btn-2 i.fa.fa-file-archive-o { color:inherit }
-        i.fa.fa-css3 { color:#f36fa0 }
-        i.fa.fa-file-code-o { color:#007bff }
-        i.fa.fa-code { color:#cc4b4c }
-        i.fa.fa-file-text-o { color:#0096e6 }
-        i.fa.fa-html5 { color:#d75e72 }
-        i.fa.fa-file-excel-o { color:#09c55d }
-        i.fa.fa-file-powerpoint-o { color:#f6712e }
-        i.go-back { font-size:1.2em;color:#007bff; }
-        .main-nav { padding:0.2rem 1rem;box-shadow:0 4px 5px 0 rgba(0, 0, 0, .14), 0 1px 10px 0 rgba(0, 0, 0, .12), 0 2px 4px -1px rgba(0, 0, 0, .2)  }
-        .dataTables_filter { display:none; }
-        table.dataTable thead .sorting { cursor:pointer;background-repeat:no-repeat;background-position:center right;background-image:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABMAAAATCAQAAADYWf5HAAAAkElEQVQoz7XQMQ5AQBCF4dWQSJxC5wwax1Cq1e7BAdxD5SL+Tq/QCM1oNiJidwox0355mXnG/DrEtIQ6azioNZQxI0ykPhTQIwhCR+BmBYtlK7kLJYwWCcJA9M4qdrZrd8pPjZWPtOqdRQy320YSV17OatFC4euts6z39GYMKRPCTKY9UnPQ6P+GtMRfGtPnBCiqhAeJPmkqAAAAAElFTkSuQmCC'); }
-        table.dataTable thead .sorting_asc { cursor:pointer;background-repeat:no-repeat;background-position:center right;background-image:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABMAAAATCAYAAAByUDbMAAAAZ0lEQVQ4y2NgGLKgquEuFxBPAGI2ahhWCsS/gDibUoO0gPgxEP8H4ttArEyuQYxAPBdqEAxPBImTY5gjEL9DM+wTENuQahAvEO9DMwiGdwAxOymGJQLxTyD+jgWDxCMZRsEoGAVoAADeemwtPcZI2wAAAABJRU5ErkJggg=='); }
-        table.dataTable thead .sorting_desc { cursor:pointer;background-repeat:no-repeat;background-position:center right;background-image:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABMAAAATCAYAAAByUDbMAAAAZUlEQVQ4y2NgGAWjYBSggaqGu5FA/BOIv2PBIPFEUgxjB+IdQPwfC94HxLykus4GiD+hGfQOiB3J8SojEE9EM2wuSJzcsFMG4ttQgx4DsRalkZENxL+AuJQaMcsGxBOAmGvopk8AVz1sLZgg0bsAAAAASUVORK5CYII='); }
-        table.dataTable thead tr:first-child th.custom-checkbox-header:first-child { background-image:none; }
-        .footer-action li { margin-bottom:10px; }
-        .app-v-title { font-size:24px;font-weight:300;letter-spacing:-.5px;text-transform:uppercase; }
-        hr.custom-hr { border-top:1px dashed #8c8b8b;border-bottom:1px dashed #fff; }
-        .ekko-lightbox .modal-dialog { max-width:98%; }
-        .ekko-lightbox-item.fade.in.show .row { background:#fff; }
-        .ekko-lightbox-nav-overlay { display:flex !important;opacity:1 !important;height:auto !important;top:50%; }
-        .ekko-lightbox-nav-overlay a { opacity:1 !important;width:auto !important;text-shadow:none !important;color:#3B3B3B; }
-        .ekko-lightbox-nav-overlay a:hover { color:#20507D; }
-        #snackbar { visibility:hidden;min-width:250px;margin-left:-125px;background-color:#333;color:#fff;text-align:center;border-radius:2px;padding:16px;position:fixed;z-index:1;left:50%;bottom:30px;font-size:17px; }
-        #snackbar.show { visibility:visible;-webkit-animation:fadein 0.5s, fadeout 0.5s 2.5s;animation:fadein 0.5s, fadeout 0.5s 2.5s; }
-        @-webkit-keyframes fadein { from { bottom:0;opacity:0; }
-        to { bottom:30px;opacity:1; }
-        }
-        @keyframes fadein { from { bottom:0;opacity:0; }
-        to { bottom:30px;opacity:1; }
-        }
-        @-webkit-keyframes fadeout { from { bottom:30px;opacity:1; }
-        to { bottom:0;opacity:0; }
-        }
-        @keyframes fadeout { from { bottom:30px;opacity:1; }
-        to { bottom:0;opacity:0; }
-        }
-        #main-table span.badge { border-bottom:2px solid #f8f9fa }
-        #main-table span.badge:nth-child(1) { border-color:#df4227 }
-        #main-table span.badge:nth-child(2) { border-color:#f8b600 }
-        #main-table span.badge:nth-child(3) { border-color:#00bd60 }
-        #main-table span.badge:nth-child(4) { border-color:#4581ff }
-        #main-table span.badge:nth-child(5) { border-color:#ac68fc }
-        #main-table span.badge:nth-child(6) { border-color:#45c3d2 }
-        @media only screen and (min-device-width:768px) and (max-device-width:1024px) and (orientation:landscape) and (-webkit-min-device-pixel-ratio:2) { .navbar-collapse .col-xs-6.text-right { padding:0; }
-        }
-        .btn.active.focus,.btn.active:focus,.btn.focus,.btn.focus:active,.btn:active:focus,.btn:focus { outline:0!important;outline-offset:0!important;background-image:none!important;-webkit-box-shadow:none!important;box-shadow:none!important }
-        .lds-facebook { display:none;position:relative;width:64px;height:64px }
-        .lds-facebook div,.lds-facebook.show-me { display:inline-block }
-        .lds-facebook div { position:absolute;left:6px;width:13px;background:#007bff;animation:lds-facebook 1.2s cubic-bezier(0,.5,.5,1) infinite }
-        .lds-facebook div:nth-child(1) { left:6px;animation-delay:-.24s }
-        .lds-facebook div:nth-child(2) { left:26px;animation-delay:-.12s }
-        .lds-facebook div:nth-child(3) { left:45px;animation-delay:0s }
-        @keyframes lds-facebook { 0% { top:6px;height:51px }
-        100%,50% { top:19px;height:26px }
-        }
-        ul#search-wrapper { padding-left: 0;border: 1px solid #ecececcc; } ul#search-wrapper li { list-style: none; padding: 5px;border-bottom: 1px solid #ecececcc; }
-        ul#search-wrapper li:nth-child(odd){ background: #f9f9f9cc;}
-        .c-preview-img {
-            max-width: 300px;
-        }
-    </style>
-    <?php
-    if (FM_THEME == "dark"): ?>
-        <style>
-            body.theme-dark { background-color: #2f2a2a; }
-            .list-group .list-group-item { background: #343a40; }
-            .theme-dark .navbar-nav i, .navbar-nav .dropdown-toggle, .break-word { color: #ffffff; }
-            a, a:hover, a:visited, a:active, #main-table .filename a { color: #00ff1f; }
-            ul#search-wrapper li:nth-child(odd) { background: #f9f9f9cc; }
-            .theme-dark .btn-outline-primary { color: #00ff1f; border-color: #00ff1f; }
-            .theme-dark .btn-outline-primary:hover, .theme-dark .btn-outline-primary:active { background-color: #028211;}
-        </style>
-    <?php endif; ?>
-</head>
-<body class="<?php echo (FM_THEME == "dark") ? 'theme-dark' : ''; ?> <?php echo $isStickyNavBar; ?>">
+    ?>
 <div id="wrapper" class="container-fluid">
 
     <!-- New Item creation -->
@@ -3763,12 +3381,11 @@ $isStickyNavBar = $sticky_navbar ? 'navbar-fixed' : 'navbar-normal';
     /**
      * Show page footer
      */
-    function fm_show_footer()
-    {
+    function fm_show_footer() {
+        global $OUTPUT;
     ?>
 </div>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.min.js"></script>
 <?php if (FM_USE_HIGHLIGHTJS): ?>
@@ -4008,9 +3625,9 @@ $isStickyNavBar = $sticky_navbar ? 'navbar-fixed' : 'navbar-normal';
 <div id="snackbar"></div>
 
 <?php
+    // Display page footer.
+    echo $OUTPUT->footer();
 }
-// Display page footer.
-echo $OUTPUT->footer();
 
 /**
  * Show image
