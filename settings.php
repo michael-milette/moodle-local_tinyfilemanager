@@ -25,9 +25,8 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-if ($hassiteconfig) {
-    $section = 'server';
-    $ADMIN->add($section, new admin_externalpage('local_tinyfilemanager',
+if ($hassiteconfig && is_siteadmin()) {
+    $ADMIN->add('server', new admin_externalpage('local_tinyfilemanager',
             get_string('pluginname', 'local_tinyfilemanager'),
             new moodle_url('/local/tinyfilemanager/')
     ));

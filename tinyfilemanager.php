@@ -195,7 +195,7 @@ $ip_blacklist = array(
 
 function human_readable_to_bytes(string $amount): int {
     $units = ['', 'K', 'M', 'G'];
-    
+
     preg_match('/(\d+)\s?([KMG]?)/', $amount, $matches);
     [$_, $nr, $unit] = $matches;
     $exp = array_search($unit, $units);
@@ -452,7 +452,7 @@ define('FM_IS_WIN', DIRECTORY_SEPARATOR == '\\');
 
 // always use ?p=
 if (!isset($_GET['p']) && empty($_FILES)) {
-    fm_redirect(FM_SELF_URL . '?p=');
+    //fm_redirect(FM_SELF_URL . '?p=');
 }
 
 // get path
@@ -1514,7 +1514,7 @@ if (isset($_GET['settings']) && !FM_READONLY) {
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="form-group row">
                         <label for="js-3-1" class="col-sm-3 col-form-label"><?php echo lng('Theme') ?></label>
                         <div class="col-sm-5">
@@ -1661,7 +1661,7 @@ if (isset($_GET['view'])) {
                 <p class="break-word"><b><?php echo $view_title ?> "<?php echo fm_enc(fm_convert_win($file)) ?>"</b></p>
                 <p class="break-word">
                     Full path: <?php echo fm_enc(fm_convert_win($file_path)) ?><br>
-                    File size: <?php echo fm_get_filesize($filesize) ?><?php if ($filesize >= 1000): ?> (<?php echo sprintf('%s bytes', $filesize) ?>)<?php endif; ?>
+                    File size: <?php echo ($filesize_raw <= 1000) ? "$filesize_raw bytes" : $filesize; ?>
                     <br>
                     MIME-type: <?php echo $mime_type ?><br>
                     <?php
@@ -2170,13 +2170,13 @@ $tableTheme = (FM_THEME == "dark") ? "text-white bg-dark table-dark" : "bg-white
                 <li class="list-inline-item"> <a href="#/select-all" class="btn btn-small btn-outline-primary btn-2" onclick="select_all();return false;"><i class="fa fa-check-square"></i> <?php echo lng('SelectAll') ?> </a></li>
                 <li class="list-inline-item"><a href="#/unselect-all" class="btn btn-small btn-outline-primary btn-2" onclick="unselect_all();return false;"><i class="fa fa-window-close"></i> <?php echo lng('UnSelectAll') ?> </a></li>
                 <li class="list-inline-item"><a href="#/invert-all" class="btn btn-small btn-outline-primary btn-2" onclick="invert_all();return false;"><i class="fa fa-th-list"></i> <?php echo lng('InvertSelection') ?> </a></li>
-                <li class="list-inline-item"><input type="submit" class="hidden" name="delete" id="a-delete" value="Delete" onclick="return confirm('<?php echo lng('Delete selected files and folders?'); ?>')">
+                <li class="list-inline-item"><input type="submit" class="d-none" name="delete" id="a-delete" value="Delete" onclick="return confirm('<?php echo lng('Delete selected files and folders?'); ?>')">
                     <a href="javascript:document.getElementById('a-delete').click();" class="btn btn-small btn-outline-primary btn-2"><i class="fa fa-trash"></i> <?php echo lng('Delete') ?> </a></li>
-                <li class="list-inline-item"><input type="submit" class="hidden" name="zip" id="a-zip" value="zip" onclick="return confirm('<?php echo lng('Create archive?'); ?>')">
+                <li class="list-inline-item"><input type="submit" class="d-none" name="zip" id="a-zip" value="zip" onclick="return confirm('<?php echo lng('Create archive?'); ?>')">
                     <a href="javascript:document.getElementById('a-zip').click();" class="btn btn-small btn-outline-primary btn-2"><i class="fa fa-file-archive-o"></i> <?php echo lng('Zip') ?> </a></li>
-                <li class="list-inline-item"><input type="submit" class="hidden" name="tar" id="a-tar" value="tar" onclick="return confirm('<?php echo lng('Create archive?'); ?>')">
+                <li class="list-inline-item"><input type="submit" class="d-none" name="tar" id="a-tar" value="tar" onclick="return confirm('<?php echo lng('Create archive?'); ?>')">
                     <a href="javascript:document.getElementById('a-tar').click();" class="btn btn-small btn-outline-primary btn-2"><i class="fa fa-file-archive-o"></i> <?php echo lng('Tar') ?> </a></li>
-                <li class="list-inline-item"><input type="submit" class="hidden" name="copy" id="a-copy" value="Copy">
+                <li class="list-inline-item"><input type="submit" class="d-none" name="copy" id="a-copy" value="Copy">
                     <a href="javascript:document.getElementById('a-copy').click();" class="btn btn-small btn-outline-primary btn-2"><i class="fa fa-files-o"></i> <?php echo lng('Copy') ?> </a></li>
             </ul>
         </div>
@@ -3845,7 +3845,7 @@ $isStickyNavBar = $sticky_navbar ? 'navbar-fixed' : 'navbar-normal';
         if(window.config.version!=v){tplObj.content=window.config.newUpdate;}else{tplObj.content=window.config.noUpdate;}
         $('#wrapper').append(template(tpl,tplObj));$("#js-ModalCenter-1024").modal('show');}else{fm_get_config();}
     }
-    function show_new_pwd() { $(".js-new-pwd").toggleClass('hidden'); }
+    function show_new_pwd() { $(".js-new-pwd").toggleClass('d-none'); }
     //Save Settings
     function save_settings($this) {
         let form = $($this);
@@ -3943,7 +3943,7 @@ $isStickyNavBar = $sticky_navbar ? 'navbar-fixed' : 'navbar-normal';
         $(".fm-upload-wrapper .card-header-tabs").on("click", 'a', function(e){
             e.preventDefault();let target=$(this).data('target');
             $(".fm-upload-wrapper .card-header-tabs a").removeClass('active');$(this).addClass('active');
-            $(".fm-upload-wrapper .card-tabs-container").addClass('hidden');$(target).removeClass('hidden');
+            $(".fm-upload-wrapper .card-tabs-container").addClass('d-none');$(target).removeClass('d-none');
         });
     });
 </script>
@@ -4095,28 +4095,28 @@ function lng($txt) {
     $tr['en']['Generate']       = 'Generate';               $tr['en']['FullSize']           = 'Full Size';
     $tr['en']['FreeOf']         = 'free of';                $tr['en']['CalculateFolderSize']= 'Calculate folder size';
     $tr['en']['ProcessID']      = 'Process ID';             $tr['en']['Created']    = 'Created';
-    $tr['en']['HideColumns']    = 'Hide Perms/Owner columns';$tr['en']['You are logged in'] = 'You are logged in'; 
+    $tr['en']['HideColumns']    = 'Hide Perms/Owner columns';$tr['en']['You are logged in'] = 'You are logged in';
     $tr['en']['Check Latest Version'] = 'Check Latest Version';$tr['en']['Generate new password hash'] = 'Generate new password hash';
     $tr['en']['Login failed. Invalid username or password'] = 'Login failed. Invalid username or password';
     $tr['en']['password_hash not supported, Upgrade PHP version'] = 'password_hash not supported, Upgrade PHP version';
     $tr['en']['MemoryUsed']     = 'Memory used';
-    
+
     // new - novos
-    
+
     $tr['en']['Advanced Search']    = 'Advanced Search';    $tr['en']['Error while copying fro']    = 'Error while copying fro';
     $tr['en']['Nothing selected']   = 'Nothing selected';   $tr['en']['Paths must be not equal']    = 'Paths must be not equal';
     $tr['en']['Renamed from']       = 'Renamed from';       $tr['en']['Archive not unpacked']       = 'Archive not unpacked';
-    $tr['en']['Deleted']            = 'Deleted';            $tr['en']['Archive not created']        = 'Archive not created';        
+    $tr['en']['Deleted']            = 'Deleted';            $tr['en']['Archive not created']        = 'Archive not created';
     $tr['en']['Copied from']        = 'Copied from';        $tr['en']['Permissions changed']        = 'Permissions changed';
     $tr['en']['to']                 = 'to';                 $tr['en']['Saved Successfully']         = 'Saved Successfully';
     $tr['en']['not found!']         = 'not found!';         $tr['en']['File Saved Successfully']    = 'File Saved Successfully';
-    $tr['en']['Archive']            = 'Archive';            $tr['en']['Permissions not changed']    = 'Permissions not changed';         
+    $tr['en']['Archive']            = 'Archive';            $tr['en']['Permissions not changed']    = 'Permissions not changed';
     $tr['en']['Select folder']      = 'Select folder';      $tr['en']['Source path not defined']    = 'Source path not defined';
     $tr['en']['already exists']     = 'already exists';     $tr['en']['Error while moving from']    = 'Error while moving from';
     $tr['en']['Create archive?']    = 'Create archive?';    $tr['en']['Invalid file or folder name']    = 'Invalid file or folder name';
     $tr['en']['Archive unpacked']   = 'Archive unpacked';   $tr['en']['File extension is not allowed']  = 'File extension is not allowed';
     $tr['en']['Root path']          = 'Root path';          $tr['en']['Error while renaming from']  = 'Error while renaming from';
-    $tr['en']['File not found']     = 'File not found';     $tr['en']['Error while deleting items'] = 'Error while deleting items';   
+    $tr['en']['File not found']     = 'File not found';     $tr['en']['Error while deleting items'] = 'Error while deleting items';
     $tr['en']['Invalid characters in file name']                = 'Invalid characters in file name';
     $tr['en']['FILE EXTENSION HAS NOT SUPPORTED']               = 'FILE EXTENSION HAS NOT SUPPORTED';
     $tr['en']['Selected files and folder deleted']              = 'Selected files and folder deleted';
@@ -4127,8 +4127,8 @@ function lng($txt) {
     $tr['en']['Invalid characters in file or folder name']      = 'Invalid characters in file or folder name';
     $tr['en']['Operations with archives are not available']     = 'Operations with archives are not available';
     $tr['en']['File or folder with this path already exists']   = 'File or folder with this path already exists';
-    
-    $tr['en']['Moved from']                 = 'Moved from'; 
+
+    $tr['en']['Moved from']                 = 'Moved from';
 
     $i18n = fm_get_translations($tr);
     $tr = $i18n ? $i18n : $tr;
