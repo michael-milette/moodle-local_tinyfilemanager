@@ -1,6 +1,6 @@
 <?php
-//Default Configuration
-$CONFIG = '{"lang":"en","error_reporting":true,"show_hidden":false,"hide_Cols":false,"calc_folder":false,"theme":"light"}';
+// This file is part of Tiny File Manager plugin for Moodle - http://moodle.org/
+//
 // Tiny File Manager is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -12,7 +12,7 @@ $CONFIG = '{"lang":"en","error_reporting":true,"show_hidden":false,"hide_Cols":f
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Tiny File Manager.  If not, see <http://www.gnu.org/licenses/>.
+// along with Tiny File Manager. If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * This plugin for Moodle is used to view and manage files through a web interface.
@@ -20,9 +20,9 @@ $CONFIG = '{"lang":"en","error_reporting":true,"show_hidden":false,"hide_Cols":f
  * @package    local_tinyfilemanager
  * @copyright  2013-2018 Alex Yashkin (MIT license)
  * @copyright  2014-2016 Icons by Yusuke Kamiyamane.
- * @copyright  2020 TNG Consulting Inc. - www.tngconsulting.ca
- * @Author     Alex Yashkin
- * @author     Michael Milette
+ * @copyright  2019-2021 TNG Consulting Inc. - www.tngconsulting.ca
+ * @author     Alex Yashkin
+ * @author     Michael Milette, transformed into Moodle plugin.
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -36,12 +36,15 @@ $PAGE->set_pagelayout('standard');
 $PAGE->set_title(get_string('pluginname', 'local_tinyfilemanager'));
 $PAGE->set_url($rooturl);
 
-// Create breadcrumbs.
-// Link to Tiny File Manager is the home directory.
+// Breadcrumb.
+
+// Site administration link.
 $PAGE->navbar->add(get_string('administrationsite'), $CFG->wwwroot . '/admin/search.php');
+// Tiny File Manager link - points to the root directory.
 $PAGE->navbar->add(get_string('pluginname', 'local_tinyfilemanager'), $rooturl);
 // Get current path from URL.
 $path = isset($_GET['p']) ? $_GET['p'] : (isset($_POST['p']) ? $_POST['p'] : '');
+// Generate breadcrumbs.
 if (!empty($path != '')) {
     $exploded = explode('/', $path);
     $count = count($exploded);
@@ -54,7 +57,7 @@ if (!empty($path != '')) {
     }
 }
 
-// We require Admin to be logged in.
+// Admin level user is required.
 require_login(0, false);
 if (!is_siteadmin()) {
     // Access denied. Only available to Moodle Administrators.
@@ -130,7 +133,10 @@ $default_timezone = 'Etc/UTC'; // UTC
 
 // Root path for file manager
 // use absolute path of directory i.e: '/var/www/folder' or $_SERVER['DOCUMENT_ROOT'].'/folder'
-$root_path = $CFG->dirroot;
+$root_path = get_config('local_tinyfilemanager', 'rootpath');
+if (empty($root_path)) { // Default.
+    $root_path = $CFG->dirroot;
+}
 
 // Root url for links in file manager.Relative to $http_host. Variants: '', 'path/to/subfolder'
 // Will not working if $root_path will be outside of server document root
@@ -230,7 +236,7 @@ if ( !defined( 'FM_SESSION_ID')) {
 $cfg = new FM_Config();
 
 // Show or hide files and folders that starts with a dot
-$show_hidden_files = isset($cfg->data['show_hidden']) ? $cfg->data['show_hidden'] : true;
+$show_hidden_files = (bool) get_config('local_tinyfilemanager', 'showhidden');
 
 // PHP error reporting - false = Turns off Errors, true = Turns on Errors
 $report_errors = ($CFG->debugdisplay == 1);
@@ -352,11 +358,6 @@ if($ip_ruleset != 'OFF'){
 
         exit();
     }
-}
-
-// update root path
-if ($use_auth && isset($_SESSION[FM_SESSION_ID]['logged'])) {
-    $root_path = isset($directories_users[$_SESSION[FM_SESSION_ID]['logged']]) ? $directories_users[$_SESSION[FM_SESSION_ID]['logged']] : $root_path;
 }
 
 // clean and check $root_path

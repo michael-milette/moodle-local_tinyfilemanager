@@ -18,7 +18,7 @@
  * Version information for Tiny File Manager.
  *
  * @package    local_tinyfilemanager
- * @copyright  2020 TNG Consulting Inc. - www.tngconsulting.ca
+ * @copyright  2019-2021 TNG Consulting Inc. - www.tngconsulting.ca
  * @author     Michael Milette
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -26,8 +26,8 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'local_tinyfilemanager';   // To check on upgrade, that module sits in correct place.
-$plugin->version   = 2019111700;        // The current module version (Date: YYYYMMDDXX).
-$plugin->requires  = 2015111600;        // Requires Moodle version 3.9.
+$plugin->version   = 2021112301;        // The current module version (Date: YYYYMMDDXX).
+$plugin->requires  = 2015111600;        // Requires Moodle version 3.0.
 $plugin->release   = '2.4.6';
-$plugin->maturity  = MATURITY_ALPHA;
+$plugin->maturity  = MATURITY_BETA;
 $plugin->cron      = 0;

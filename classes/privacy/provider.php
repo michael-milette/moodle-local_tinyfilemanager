@@ -15,7 +15,7 @@
 // along with Tiny File Manager. If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This plugin for Moodle is used by administrators to manage their Moodle files through a web interface..
+ * Privacy Subsystem implementation for local_tinyfilemanager.
  *
  * @package    local_tinyfilemanager
  * @copyright  2019-2021 TNG Consulting Inc. - www.tngconsulting.ca
@@ -23,12 +23,25 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace local_tinyfilemanager\privacy;
+
 defined('MOODLE_INTERNAL') || die();
 
-$string['pluginname'] = 'Tiny File Manager';
-$string['privacy:metadata'] = 'The Tiny File Manager plugin does not store any personal data about any user.';
-$string['about'] = 'The Tiny File Manager plugin enables administrators to manage their Moodle files through a web interface.';
-$string['rootpath'] = 'Root path';
-$string['rootpath_desc'] = 'Root path that user can browse.';
-$string['showhidden'] = 'Show hidden';
-$string['showhidden_desc'] = 'Show hidden files and folders.';
+/**
+ * Privacy Subsystem for local_tinyfilemanager implementing null_provider.
+ *
+ * @copyright  2018-2021 TNG Consulting Inc. <www.tngconsulting.ca>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class provider implements \core_privacy\local\metadata\null_provider {
+
+    /**
+     * Get the language string identifier with the component's language
+     * file to explain why this plugin stores no data.
+     *
+     * @return  string
+     */
+    public static function get_reason() : string {
+        return 'privacy:metadata';
+    }
+}
