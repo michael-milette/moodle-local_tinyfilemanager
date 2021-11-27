@@ -1870,7 +1870,7 @@ $tableTheme = "bg-white";
                         <div class="filename"><a href="?p=<?php echo urlencode(trim(FM_PATH . '/' . $f, '/')) ?>"><i class="<?php echo $img ?>"></i> <?php echo fm_convert_win(fm_enc($f)) ?>
                             </a><?php echo($is_link ? ' &rarr; <i>' . readlink($path . '/' . $f) . '</i>' : '') ?></div>
                     </td>
-                    <td data-sort="a-<?php echo str_pad($filesize_raw, 18, "0", STR_PAD_LEFT);?>">
+                    <td data-sort="a-<?php echo str_pad($filesize_raw, 18, "0", STR_PAD_LEFT);?>" class="right">
                         <?php echo $filesize; ?>
                     </td>
                     <td data-sort="a-<?php echo $modif_raw;?>"><?php echo $modif ?></td>
@@ -1898,7 +1898,7 @@ $tableTheme = "bg-white";
                 $modif_raw = filemtime($path . '/' . $f);
                 $modif = userdate($modif_raw, FM_DATETIME_FORMAT);
                 $filesize_raw = fm_get_size($path . '/' . $f);
-                $filesize = fm_get_filesize($filesize_raw);
+                $filesize = number_format($filesize_raw, 0, '', get_string('thousandssep', 'langconfig'));
                 $filelink = '?p=' . urlencode(FM_PATH) . '&amp;view=' . urlencode($f);
                 $all_files_size += $filesize_raw;
                 $perms = substr(decoct(fileperms($path . '/' . $f)), -4);
@@ -1932,7 +1932,7 @@ $tableTheme = "bg-white";
                                 <?php echo($is_link ? ' &rarr; <i>' . readlink($path . '/' . $f) . '</i>' : '') ?>
                         </div>
                     </td>
-                    <td data-sort=b-"<?php echo str_pad($filesize_raw, 18, "0", STR_PAD_LEFT); ?>"><span title="<?php printf('%s bytes', $filesize_raw) ?>">
+                    <td data-sort=b-"<?php echo str_pad($filesize_raw, 18, "0", STR_PAD_LEFT); ?>" class="right"><span title="<?php printf('%s bytes', $filesize_raw) ?>">
                         <?php echo $filesize; ?>
                         </span></td>
                     <td data-sort="b-<?php echo $modif_raw;?>"><?php echo $modif ?></td>
