@@ -86,7 +86,7 @@ define('VERSION', '2.4.6');
 // Application Title
 define('APP_TITLE', 'Tiny File Manager');
 define('FM_EMBED', true);
-define('FM_ROOT_URL', $CFG->wwwroot);
+//define('FM_ROOT_URL', $CFG->wwwroot);
 define('FM_SELF_URL', $CFG->wwwroot . '/local/tinyfilemanager/');
 define('FM_DATETIME_FORMAT', get_string('strftimedatetimeshort', 'core_langconfig'));
 define('FM_LOCKSETTINGS', 1);
@@ -131,16 +131,28 @@ $edit_files = true;
 // Doc - http://php.net/manual/en/timezones.php
 $default_timezone = 'Etc/UTC'; // UTC
 
+// Root url for links in file manager. Relative to $http_host. Variants: '', 'path/to/subfolder'
+// Will not working if $root_path will be outside of server webroot.
+$dirroot = rtrim(str_replace('\\', '/', $CFG->dirroot), '/');
+if (strpos($dirroot, ':') !== false) {
+    $dirroot = substr($dirroot, strpos($dirroot, ':') + 1);
+}
+
 // Root path for file manager
 // use absolute path of directory i.e: '/var/www/folder' or $_SERVER['DOCUMENT_ROOT'].'/folder'
 $root_path = get_config('local_tinyfilemanager', 'rootpath');
 if (empty($root_path)) { // Default.
-    $root_path = $CFG->dirroot;
+    $root_path = $dirroot;
 }
-
-// Root url for links in file manager.Relative to $http_host. Variants: '', 'path/to/subfolder'
-// Will not working if $root_path will be outside of server document root
-$root_url = '';
+// If path is not absolute, make it relative to Moodle's dirroot.
+if (substr($root_path, 0, 1) != '/') {
+    $root_path = $dirroot . '/' . $root_path;
+}
+if (substr($dirroot, 0, strlen($root_path)) == $dirroot) {
+    $root_url = substr($root_path, strlen($dirroot));
+} else {
+    $root_url = '';
+}
 
 // Server hostname. Can set manually if wrong
 $http_host = $_SERVER['HTTP_HOST'];
@@ -163,6 +175,12 @@ $allowed_file_extensions = '';
 // Allowed file extensions for upload files
 // e.g. 'gif,png,jpg,html,txt'
 $allowed_upload_extensions = '';
+
+// Favicon path. This can be either a full url to an .PNG image, or a path based on the document root.
+// full path, e.g http://example.com/favicon.png
+// local path, e.g images/icons/favicon.png
+// Will be handled by Moodle.
+// $favicon_path = '';
 
 // Files and folders to excluded from listing
 // e.g. array('myfile.html', 'personal-folder', '*.php', ...)
@@ -207,6 +225,7 @@ $ip_blacklist = array(
 );
 
 // if User has the customized config file, try to use it to override the default config above
+// Config is stored in Moodle.
 // $config_file = __DIR__.'/config.php';
 // if (is_readable($config_file)) {
 //     @include($config_file);
@@ -224,6 +243,7 @@ function human_readable_to_bytes(string $amount): int {
 }
 
 // max upload file size
+// Take max_post_size from php.ini.
 $max_upload_size_bytes = min(human_readable_to_bytes(ini_get('post_max_size')), human_readable_to_bytes(ini_get('upload_max_filesize')));
 define('MAX_UPLOAD_SIZE', $max_upload_size_bytes);
 
@@ -235,11 +255,16 @@ if ( !defined( 'FM_SESSION_ID')) {
 // Configuration
 $cfg = new FM_Config();
 
+// Default language
+// Handled by Moodle.
+// $lang = isset($cfg->data['lang']) ? $cfg->data['lang'] : 'en';
 // Show or hide files and folders that starts with a dot
+// Setting is stored in Moodle.
 $show_hidden_files = (bool) get_config('local_tinyfilemanager', 'showhidden');
 
 // PHP error reporting - false = Turns off Errors, true = Turns on Errors
-$report_errors = ($CFG->debugdisplay == 1);
+// Controlled by Moodle settings.
+$report_errors = ($CFG->debugdisplay == 1 && $CFG->debug != 0);
 
 // Hide Permissions and Owner cols in file-listing
 $hide_Cols = isset($cfg->data['hide_Cols']) ? $cfg->data['hide_Cols'] : true;
@@ -252,6 +277,7 @@ $theme = isset($cfg->data['theme']) ? $cfg->data['theme'] : 'light';
 
 define('FM_THEME', $theme);
 //available languages
+// Language switching is controlled by Moodle
 $lang_list = array(
     $lang => ''
 );
@@ -312,19 +338,14 @@ if (isset($_SESSION[FM_SESSION_ID]['logged']) && !empty($directories_users[$_SES
 $root_url = fm_clean_path($root_url);
 
 // abs path for site
-defined('FM_ROOT_URL') || define('FM_ROOT_URL', ($is_https ? 'https' : 'http') . '://' . $http_host . (!empty($root_url) ? '/' . $root_url : ''));
-defined('FM_SELF_URL') || define('FM_SELF_URL', ($is_https ? 'https' : 'http') . '://' . $http_host . $_SERVER['PHP_SELF']);
+defined('FM_ROOT_URL') || define('FM_ROOT_URL', $CFG->wwwroot . (!empty($root_url) ? '/' . $root_url : ''));
+defined('FM_SELF_URL') || define('FM_SELF_URL', $CFG->wwwroot . '/local/tinyfilemanager/index.php');
 
 // logout
 if (isset($_GET['logout'])) {
     unset($_SESSION[FM_SESSION_ID]['logged']);
     fm_redirect(FM_SELF_URL);
 }
-
-// Show image here
-//if (isset($_GET['img'])) {
-//    fm_show_image($_GET['img']);
-//}
 
 // Validate connection IP
 if($ip_ruleset != 'OFF'){
@@ -1647,15 +1668,15 @@ if (isset($_GET['edit'])) {
                 <div class="btn-toolbar" role="toolbar">
                     <?php if (!$isNormalEditor) { ?>
                         <div class="btn-group js-ace-toolbar">
-                            <button data-cmd="none" data-option="fullscreen" class="btn btn-sm btn-outline-secondary" id="js-ace-fullscreen" title="Fullscreen"><i class="fa fa-expand" title="Fullscreen"></i></button>
-                            <button data-cmd="find" class="btn btn-sm btn-outline-secondary" id="js-ace-search" title="Search"><i class="fa fa-search" title="Search"></i></button>
-                            <button data-cmd="undo" class="btn btn-sm btn-outline-secondary" id="js-ace-undo" title="Undo"><i class="fa fa-undo" title="Undo"></i></button>
-                            <button data-cmd="redo" class="btn btn-sm btn-outline-secondary" id="js-ace-redo" title="Redo"><i class="fa fa-repeat" title="Redo"></i></button>
-                            <button data-cmd="none" data-option="wrap" class="btn btn-sm btn-outline-secondary" id="js-ace-wordWrap" title="Word Wrap"><i class="fa fa-text-width" title="Word Wrap"></i></button>
-                            <button data-cmd="none" data-option="help" class="btn btn-sm btn-outline-secondary" id="js-ace-goLine" title="Help"><i class="fa fa-question" title="Help"></i></button>
-                            <select id="js-ace-mode" data-type="mode" title="Select Document Type" class="btn-outline-secondary border-left-0 d-none d-md-block"><option>-- Select Mode --</option></select>
-                            <select id="js-ace-theme" data-type="theme" title="Select Theme" class="btn-outline-secondary border-left-0 d-none d-lg-block"><option>-- Select Theme --</option></select>
-                            <select id="js-ace-fontSize" data-type="fontSize" title="Select Font Size" class="btn-outline-secondary border-left-0 d-none d-lg-block"><option>-- Select Font Size --</option></select>
+                            <button data-cmd="none" data-option="fullscreen" class="btn btn-sm" id="js-ace-fullscreen" title="Fullscreen"><i class="fa fa-expand" title="Fullscreen"></i></button>
+                            <button data-cmd="find" class="btn btn-sm" id="js-ace-search" title="Search"><i class="fa fa-search" title="Search"></i></button>
+                            <button data-cmd="undo" class="btn btn-sm" id="js-ace-undo" title="Undo"><i class="fa fa-undo" title="Undo"></i></button>
+                            <button data-cmd="redo" class="btn btn-sm" id="js-ace-redo" title="Redo"><i class="fa fa-repeat" title="Redo"></i></button>
+                            <button data-cmd="none" data-option="wrap" class="btn btn-sm" id="js-ace-wordWrap" title="Word Wrap"><i class="fa fa-text-width" title="Word Wrap"></i></button>
+                            <button data-cmd="none" data-option="help" class="btn btn-sm" id="js-ace-goLine" title="Help"><i class="fa fa-question" title="Help"></i></button>
+                            <select id="js-ace-mode" data-type="mode" title="Select Document Type" class="border-left-0 d-none d-md-block"><option>-- Select Mode --</option></select>
+                            <select id="js-ace-theme" data-type="theme" title="Select Theme" class="border-left-0 d-none d-lg-block"><option>-- Select Theme --</option></select>
+                            <select id="js-ace-fontSize" data-type="fontSize" title="Select Font Size" class="border-left-0 d-none d-lg-block"><option>-- Select Font Size --</option></select>
                         </div>
                     <?php } ?>
                 </div>
@@ -3216,13 +3237,10 @@ function fm_show_nav_path($path)
     $getTheme = fm_get_theme();
     $getTheme .= " navbar-light bg-white";
     ?>
-    <nav class="navbar navbar-expand-lg <?php echo $getTheme; ?> mb-4 main-nav <?php echo $isStickyNavBar ?> position-relative">
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+    <nav class="navbar navbar-expand <?php echo $getTheme; ?> mb-0 main-nav <?php echo $isStickyNavBar ?> position-relative">
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <div class="col-xs-6 col-sm-7 text-right">
-                <ul class="navbar-nav mr-auto float-right <?php echo fm_get_theme();  ?>">
+            <div class="text-right">
+                <ul class="navbar-nav mr-auto <?php echo fm_get_theme();  ?>">
                     <li class="nav-item mr-2">
                         <div class="input-group input-group-sm mr-1" style="margin-top:4px;">
                             <input type="text" class="form-control" placeholder="<?php echo lng('Search') ?>" aria-label="<?php echo lng('Search') ?>" aria-describedby="search-addon2" id="search-addon">
@@ -3244,24 +3262,6 @@ function fm_show_nav_path($path)
                     <li class="nav-item">
                         <a title="<?php echo lng('NewItem') ?>" class="nav-link" href="#createNewItem" data-toggle="modal" data-target="#createNewItem"><i class="fa fa-plus-square"></i> <?php echo lng('NewItem') ?></a>
                     </li>
-                    <?php endif; ?>
-                    <?php if (FM_USE_AUTH): ?>
-                    <li class="nav-item avatar dropdown">
-                        <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink-5" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="fa fa-user-circle"></i> <?php if(isset($_SESSION[FM_SESSION_ID]['logged'])) { echo $_SESSION[FM_SESSION_ID]['logged']; } ?></a>
-                        <div class="dropdown-menu dropdown-menu-right <?php echo fm_get_theme(); ?>" aria-labelledby="navbarDropdownMenuLink-5">
-                            <?php if (!FM_READONLY): ?>
-                            <a title="<?php echo lng('Settings') ?>" class="dropdown-item nav-link" href="?p=<?php echo urlencode(FM_PATH) ?>&amp;settings=1"><i class="fa fa-cog" aria-hidden="true"></i> <?php echo lng('Settings') ?></a>
-                            <?php endif ?>
-                            <a title="<?php echo lng('Help') ?>" class="dropdown-item nav-link" href="?p=<?php echo urlencode(FM_PATH) ?>&amp;help=2"><i class="fa fa-exclamation-circle" aria-hidden="true"></i> <?php echo lng('Help') ?></a>
-                            <a title="<?php echo lng('Logout') ?>" class="dropdown-item nav-link" href="?logout=1"><i class="fa fa-sign-out" aria-hidden="true"></i> <?php echo lng('Logout') ?></a>
-                        </div>
-                    </li>
-                    <?php else: /* ?>
-                        <?php if (!FM_READONLY): ?>
-                            <li class="nav-item">
-                                <a title="<?php echo lng('Settings') ?>" class="dropdown-item nav-link" href="?p=<?php echo urlencode(FM_PATH) ?>&amp;settings=1"><i class="fa fa-cog" aria-hidden="true"></i> <?php echo lng('Settings') ?></a>
-                            </li>
-                        <?php endif; */ ?>
                     <?php endif; ?>
                 </ul>
             </div>
@@ -3290,7 +3290,7 @@ function fm_show_header() {
     global $OUTPUT;
     echo $OUTPUT->header();
     ?>
-<div id="wrapper" class="container-fluid">
+<div id="tinyfilemanager-wrapper" class="container-fluid">
 
     <!-- New Item creation -->
     <div class="modal fade" id="createNewItem" tabindex="-1" role="dialog" aria-label="newItemModalLabel" aria-hidden="true">
@@ -3629,46 +3629,6 @@ function fm_show_header() {
     // Display page footer.
     echo $OUTPUT->footer();
 }
-
-/**
- * Show image
- * @param string $img
- */
-function fm_show_image($img)
-{
-    $modified_time = gmdate('D, d M Y 00:00:00') . ' GMT';
-    $expires_time = gmdate('D, d M Y 00:00:00', strtotime('+1 day')) . ' GMT';
-
-    $img = trim($img);
-    $images = fm_get_images();
-    $image = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAEElEQVR42mL4//8/A0CAAQAI/AL+26JNFgAAAABJRU5ErkJggg==';
-    if (isset($images[$img])) {
-        $image = $images[$img];
-    }
-    $image = base64_decode($image);
-    if (function_exists('mb_strlen')) {
-        $size = mb_strlen($image, '8bit');
-    } else {
-        $size = strlen($image);
-    }
-
-    if (function_exists('header_remove')) {
-        header_remove('Cache-Control');
-        header_remove('Pragma');
-    } else {
-        header('Cache-Control:');
-        header('Pragma:');
-    }
-
-    header('Last-Modified: ' . $modified_time, true, 200);
-    header('Expires: ' . $expires_time);
-    header('Content-Length: ' . $size);
-    header('Content-Type: image/png');
-    echo $image;
-
-    exit;
-}
-
 
 /**
  * Language Translation System

@@ -29,6 +29,6 @@ $string['pluginname'] = 'Tiny File Manager';
 $string['privacy:metadata'] = 'The Tiny File Manager plugin does not store any personal data about any user.';
 $string['about'] = 'The Tiny File Manager plugin enables administrators to manage their Moodle files through a web interface.';
 $string['rootpath'] = 'Root path';
-$string['rootpath_desc'] = 'Root path that user can browse.';
+$string['rootpath_desc'] = 'Root path that user can browse. If you do not include a leading forward slash, the path is relative to your Moodle wwwroot home directory.';
 $string['showhidden'] = 'Show hidden';
 $string['showhidden_desc'] = 'Show hidden files and folders.';
