@@ -1235,7 +1235,7 @@ if (isset($_GET['upload']) && !FM_READONLY) {
                     </div>
                 </form>
 
-                <div class="upload-url-wrapper card-tabs-container hidden" id="urlUploader">
+                <div class="upload-url-wrapper card-tabs-container" id="urlUploader">
                     <form id="js-form-url-upload" class="form-inline" onsubmit="return upload_from_url(this);" method="POST" action="">
                         <input type="hidden" name="type" value="upload" aria-label="hidden" aria-hidden="true">
                         <input type="url" placeholder="URL" name="uploadurl" required class="form-control" style="width: 80%">

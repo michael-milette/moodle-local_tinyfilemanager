@@ -26,7 +26,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'local_tinyfilemanager';   // To check on upgrade, that module sits in correct place.
-$plugin->version   = 2021112301;        // The current module version (Date: YYYYMMDDXX).
+$plugin->version   = 2021121001;        // The current module version (Date: YYYYMMDDXX).
 $plugin->requires  = 2015111600;        // Requires Moodle version 3.0.
 $plugin->release   = '2.4.6';
 $plugin->maturity  = MATURITY_BETA;
