@@ -7,6 +7,7 @@ Note that this is a development release. The Advanced Editor still has display i
 
 ### Added
 - Icon and logo.
+- Setting to hide owner and permissions column on non-Windows OS'.
 
 ### Updated
 - Fixed missing upload by URL form.
