@@ -270,7 +270,7 @@ $report_errors = ($CFG->debugdisplay == 1 && $CFG->debug != 0);
 $hide_Cols = empty(get_config('local_tinyfilemanager', 'showpermowner'));
 
 // Show directory size: true or speedup output: false
-$calc_folder = isset($cfg->data['calc_folder']) ? $cfg->data['calc_folder'] : true;
+$calc_folder = !empty(get_config('local_tinyfilemanager', 'calcfoldersize'));
 
 // Theme
 $theme = isset($cfg->data['theme']) ? $cfg->data['theme'] : 'light';
@@ -2348,17 +2348,25 @@ function fm_get_size($file)
 }
 
 /**
- * Get nice filesize
- * @param int $size
+ * Get formatted filesize
+ * @param int $bytes
  * @return string
  */
-function fm_get_filesize($size)
+function fm_get_filesize($bytes)
 {
-    $size = (float) $size;
-    $units = array('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
-    $power = ($size > 0) ? floor(log($size, 1024)) : 0;
-    $power = ($power > (count($units) - 1)) ? (count($units) - 1) : $power;
-    return sprintf('%s %s', round($size / pow(1024, $power), 2), $units[$power]);
+    static $thousandssep;
+    static $decsep;
+    static $units;
+    if (empty($decsep)) {
+        $thousandssep = get_string('thousandssep', 'langconfig');
+        $decsep = get_string('decsep', 'langconfig');
+        $units = explode(',', get_string('units', 'local_tinyfilemanager'));
+    }
+    $bytes = (float) $bytes;
+    $base = 1024;
+    $factor = min((int) log($bytes, $base), count($units) - 1);
+    $precision = [0, 2, 2, 1, 1, 1, 1, 0];
+    return sprintf('%s %s', number_format($bytes / pow($base, $factor), $precision[$factor], $decsep, $thousandssep), $units[$factor]);
 }
 
 /**
@@ -2377,7 +2385,7 @@ function fm_get_directorysize($directory) {
         }
     else if ($file->isDir()) { $dirCount++; }
     // return [$size, $count, $dirCount];
-    return fm_get_filesize($size);
+    return $size;
     }
     else return 'Folder'; //  Quick output
 }

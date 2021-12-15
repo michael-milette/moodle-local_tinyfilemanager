@@ -51,6 +51,14 @@ if ($hassiteconfig) {
         $settings->add($setting);
     }
 
+    // Option to calculate size of folders.
+    $default = '0';
+    $name = 'local_tinyfilemanager/calcfoldersize';
+    $title = get_string('calcfoldersize', 'local_tinyfilemanager');
+    $description = get_string('calcfoldersize_desc', 'local_tinyfilemanager');
+    $setting = new admin_setting_configcheckbox($name, $title, $description, $default);
+    $settings->add($setting);
+
     // Option to specify the root directory path displayed TinyFileManager.
     $default = substr($CFG->dirroot, 1,1) == ':' ? substr($CFG->dirroot, 2) : $CFG->dirroot;
     $default = str_replace('\\', '/', $default);
