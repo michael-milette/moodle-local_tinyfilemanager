@@ -88,7 +88,7 @@ define('APP_TITLE', 'Tiny File Manager');
 define('FM_EMBED', true);
 //define('FM_ROOT_URL', $CFG->wwwroot);
 define('FM_SELF_URL', $CFG->wwwroot . '/local/tinyfilemanager/');
-define('FM_DATETIME_FORMAT', get_string('strftimedatetimeshort', 'core_langconfig'));
+define('FM_DATETIME_FORMAT', '%Y-%m-%d, %H:%M:%S'); // ISO 8601 so that it can be sorted by date.
 define('FM_LOCKSETTINGS', 1);
 unset($_GET['settings']); // Disable built-in settings.
 
