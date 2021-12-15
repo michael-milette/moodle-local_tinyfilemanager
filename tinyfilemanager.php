@@ -267,7 +267,7 @@ $show_hidden_files = (bool) get_config('local_tinyfilemanager', 'showhidden');
 $report_errors = ($CFG->debugdisplay == 1 && $CFG->debug != 0);
 
 // Hide Permissions and Owner cols in file-listing
-$hide_Cols = isset($cfg->data['hide_Cols']) ? $cfg->data['hide_Cols'] : true;
+$hide_Cols = empty(get_config('local_tinyfilemanager', 'showpermowner'));
 
 // Show directory size: true or speedup output: false
 $calc_folder = isset($cfg->data['calc_folder']) ? $cfg->data['calc_folder'] : true;
@@ -493,53 +493,6 @@ if (isset($_POST['ajax']) && !FM_READONLY) {
         } catch (Exception $e) {
             echo $e->getMessage();
         }
-    }
-
-    // Save Config
-    if (isset($_POST['type']) && $_POST['type'] == "settings") {
-        global $cfg, $lang, $report_errors, $show_hidden_files, $lang_list, $hide_Cols, $calc_folder, $theme;
-        $newLng = $_POST['js-language'];
-        fm_get_translations([]);
-        if (!array_key_exists($newLng, $lang_list)) {
-            $newLng = 'en';
-        }
-
-        $erp = isset($_POST['js-error-report']) && $_POST['js-error-report'] == "true" ? true : false;
-        $shf = isset($_POST['js-show-hidden']) && $_POST['js-show-hidden'] == "true" ? true : false;
-        $hco = isset($_POST['js-hide-cols']) && $_POST['js-hide-cols'] == "true" ? true : false;
-        $caf = isset($_POST['js-calc-folder']) && $_POST['js-calc-folder'] == "true" ? true : false;
-        $te3 = $_POST['js-theme-3'];
-
-        if ($cfg->data['lang'] != $newLng) {
-            $cfg->data['lang'] = $newLng;
-            $lang = $newLng;
-        }
-        if ($cfg->data['error_reporting'] != $erp) {
-            $cfg->data['error_reporting'] = $erp;
-            $report_errors = $erp;
-        }
-        if ($cfg->data['show_hidden'] != $shf) {
-            $cfg->data['show_hidden'] = $shf;
-            $show_hidden_files = $shf;
-        }
-        if ($cfg->data['show_hidden'] != $shf) {
-            $cfg->data['show_hidden'] = $shf;
-            $show_hidden_files = $shf;
-        }
-        if ($cfg->data['hide_Cols'] != $hco) {
-            $cfg->data['hide_Cols'] = $hco;
-            $hide_Cols = $hco;
-        }
-        if ($cfg->data['calc_folder'] != $caf) {
-            $cfg->data['calc_folder'] = $caf;
-            $calc_folder = $caf;
-        }
-        if ($cfg->data['theme'] != $te3) {
-            $cfg->data['theme'] = $te3;
-            $theme = $te3;
-        }
-        $cfg->save();
-        echo true;
     }
 
     // new password hash

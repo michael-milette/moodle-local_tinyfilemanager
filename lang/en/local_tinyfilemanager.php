@@ -32,3 +32,5 @@ $string['rootpath'] = 'Root path';
 $string['rootpath_desc'] = 'Root path that user can browse. If you do not include a leading forward slash, the path is relative to your Moodle wwwroot home directory.';
 $string['showhidden'] = 'Show hidden';
 $string['showhidden_desc'] = 'Show hidden files and folders.';
+$string['showpermowner'] = 'Show Perms/Owner columns';
+$string['showpermowner_desc'] = 'Show hidden permissions and owner columns in file/directory listing.';

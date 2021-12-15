@@ -40,6 +40,18 @@ if ($hassiteconfig) {
     $setting = new admin_setting_configcheckbox($name, $title, $description, $default);
     $settings->add($setting);
 
+    // Option to show or hide permissions and owner column.
+    if (DIRECTORY_SEPARATOR === '/') {
+        // Only on Unix, Linux, MacOS.
+        $default = '1';
+        $name = 'local_tinyfilemanager/showpermowner';
+        $title = get_string('showpermowner', 'local_tinyfilemanager');
+        $description = get_string('showpermowner_desc', 'local_tinyfilemanager');
+        $setting = new admin_setting_configcheckbox($name, $title, $description, $default);
+        $settings->add($setting);
+    }
+
+    // Option to specify the root directory path displayed TinyFileManager.
     $default = substr($CFG->dirroot, 1,1) == ':' ? substr($CFG->dirroot, 2) : $CFG->dirroot;
     $default = str_replace('\\', '/', $default);
     $name = 'local_tinyfilemanager/rootpath';
