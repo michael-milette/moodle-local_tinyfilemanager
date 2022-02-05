@@ -20,9 +20,9 @@
  * @package    local_tinyfilemanager
  * @copyright  2013-2018 Alex Yashkin (MIT license)
  * @copyright  2014-2016 Icons by Yusuke Kamiyamane.
- * @copyright  2019-2021 TNG Consulting Inc. - www.tngconsulting.ca
+ * @copyright  2019-2022 TNG Consulting Inc. - www.tngconsulting.ca
  * @author     Alex Yashkin
- * @author     Michael Milette, transformed into Moodle plugin.
+ * @author     Michael Milette, plugin version for Moodle LMS.
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -1318,62 +1318,6 @@ if (isset($_GET['copy']) && !isset($_GET['finish']) && !FM_READONLY) {
     exit;
 }
 
-if (isset($_GET['help'])) {
-    fm_show_header(); // HEADER
-    fm_show_nav_path(FM_PATH); // current path
-    global $cfg, $lang;
-    ?>
-
-    <div class="col-md-8 offset-md-2 pt-3">
-        <div class="card mb-2 <?php echo fm_get_theme(); ?>">
-            <h6 class="card-header">
-                <i class="fa fa-exclamation-circle"></i> <?php echo lng('Help') ?>
-                <a href="?p=<?php echo FM_PATH ?>" class="float-right"><i class="fa fa-window-close"></i> <?php echo lng('Cancel')?></a>
-            </h6>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-xs-12 col-sm-6">
-                        <p><h3><a href="https://github.com/prasathmani/tinyfilemanager" target="_blank" class="app-v-title"> Tiny File Manager <?php echo VERSION; ?></a></h3></p>
-                        <p>Author: Prasath Mani</p>
-                        <p>Mail Us: <a href="mailto:ccpprogrammers@gmail.com">ccpprogrammers[at]gmail.com</a> </p>
-                    </div>
-                    <div class="col-xs-12 col-sm-6">
-                        <div class="card">
-                            <ul class="list-group list-group-flush">
-                                <li class="list-group-item"><a href="https://github.com/prasathmani/tinyfilemanager/wiki" target="_blank"><i class="fa fa-question-circle"></i> <?php echo lng('Help Documents') ?> </a> </li>
-                                <li class="list-group-item"><a href="https://github.com/prasathmani/tinyfilemanager/issues" target="_blank"><i class="fa fa-bug"></i> <?php echo lng('Report Issue') ?></a></li>
-                                <li class="list-group-item"><a href="javascript:latest_release_info('<?php echo VERSION; ?>');"><i class="fa fa-link"> </i> <?php echo lng('Check Latest Version') ?></a></li>
-                                <?php if(!FM_READONLY) { ?>
-                                <li class="list-group-item"><a href="javascript:show_new_pwd();"><i class="fa fa-lock"></i> <?php echo lng('Generate new password hash') ?></a></li>
-                                <?php } ?>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="row js-new-pwd hidden mt-2">
-                    <div class="col-12">
-                        <form class="form-inline" onsubmit="return new_password_hash(this)" method="POST" action="">
-                            <input type="hidden" name="type" value="pwdhash" aria-label="hidden" aria-hidden="true">
-                            <div class="form-group mb-2">
-                                <label for="staticEmail2"><?php echo lng('Generate new password hash') ?></label>
-                            </div>
-                            <div class="form-group mx-sm-3 mb-2">
-                                <label for="inputPassword2" class="sr-only"><?php echo lng('Password') ?></label>
-                                <input type="text" class="form-control btn-sm" id="inputPassword2" name="inputPassword2" placeholder="Password" required>
-                            </div>
-                            <button type="submit" class="btn btn-success btn-sm mb-2"><?php echo lng('Generate') ?></button>
-                        </form>
-                        <textarea class="form-control" rows="2" readonly id="js-pwd-result"></textarea>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <?php
-    fm_show_footer();
-    exit;
-}
-
 // file viewer
 if (isset($_GET['view'])) {
     $file = $_GET['view'];
@@ -1626,7 +1570,6 @@ if (isset($_GET['edit'])) {
                             <button data-cmd="undo" class="btn btn-sm" id="js-ace-undo" title="Undo"><i class="fa fa-undo" title="Undo"></i></button>
                             <button data-cmd="redo" class="btn btn-sm" id="js-ace-redo" title="Redo"><i class="fa fa-repeat" title="Redo"></i></button>
                             <button data-cmd="none" data-option="wrap" class="btn btn-sm" id="js-ace-wordWrap" title="Word Wrap"><i class="fa fa-text-width" title="Word Wrap"></i></button>
-                            <button data-cmd="none" data-option="help" class="btn btn-sm" id="js-ace-goLine" title="Help"><i class="fa fa-question" title="Help"></i></button>
                             <select id="js-ace-mode" data-type="mode" title="Select Document Type" class="border-left-0 d-none d-md-block"><option>-- Select Mode --</option></select>
                             <select id="js-ace-theme" data-type="theme" title="Select Theme" class="border-left-0 d-none d-lg-block"><option>-- Select Theme --</option></select>
                             <select id="js-ace-fontSize" data-type="fontSize" title="Select Font Size" class="border-left-0 d-none d-lg-block"><option>-- Select Font Size --</option></select>
@@ -3364,7 +3307,7 @@ function fm_show_header() {
         });
     });
     //TFM Config
-    window.curi = "https://tinyfilemanager.github.io/config.json", window.config = null;
+    window.curi = "config.json", window.config = null;
     function fm_get_config(){ if(!!window.name){ window.config = JSON.parse(window.name); } else { $.getJSON(window.curi).done(function(c) { if(!!c) { window.name = JSON.stringify(c), window.config = c; } }); }}
     function template(html,options){
         var re=/<\%([^\%>]+)?\%>/g,reExp=/(^( )?(if|for|else|switch|case|break|{|}))(.*)?/g,code='var r=[];\n',cursor=0,match;var add=function(line,js){js?(code+=line.match(reExp)?line+'\n':'r.push('+line+');\n'):(code+=line!=''?'r.push("'+line.replace(/"/g,'\\"')+'");\n':'');return add}
@@ -3566,8 +3509,6 @@ function fm_show_header() {
                     } else if(editorOption == "wrap") {
                         let wrapStatus = (editor.getSession().getUseWrapMode()) ? false : true;
                         editor.getSession().setUseWrapMode(wrapStatus);
-                    } else if(editorOption == "help") {
-                        var helpHtml="";$.each(window.config.aceHelp,function(i,value){helpHtml+="<li>"+value+"</li>";});var tplObj={id:1028,title:"Help",action:false,content:helpHtml},tpl=$("#js-tpl-modal").html();$('#wrapper').append(template(tpl,tplObj));$("#js-ModalCenter-1028").modal('show');
                     }
                 }
             });
