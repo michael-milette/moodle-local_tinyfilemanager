@@ -1,0 +1,24 @@
+{
+    "name": "michael-milette/moodle-local_tinyfilemanager",
+    "type": "moodle-local",
+    "description": "An online file manager for Moodle Administrators. You can upload, download, view, move, copy, zip and unzip files; edit text-based files such as HTML, JavaScript, CSS, PHP code and more.",
+    "license": "GPL-3.0+",
+    "authors": [
+        {
+            "name": "Michael Milette - TNG Consulting Inc.",
+            "homepage": "https://www.tngconsulting.ca",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "composer/installers": "~1.0"
+    },
+    "extra": {
+        "installer-name": "tinyfilemanager"
+    },
+    "support": {
+        "issues": "https://github.com/michael-milette/moodle-local_tinyfilemanager/issues",
+        "source": "https://github.com/michael-milette/moodle-local_tinyfilemanager/",
+        "docs": "https://github.com/michael-milette/moodle-local_tinyfilemanager/blob/master/README.md"
+    }
+}
