@@ -18,7 +18,7 @@
  * This plugin for Moodle is used by administrators to manage their Moodle files through a web interface..
  *
  * @package    local_tinyfilemanager
- * @copyright  2019-2021 TNG Consulting Inc. - www.tngconsulting.ca
+ * @copyright  2019-2022 TNG Consulting Inc. - www.tngconsulting.ca
  * @author     Michael Milette
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -35,5 +35,5 @@ $string['showhidden_desc'] = 'Show hidden files and directories.';
 $string['showpermowner'] = 'Show Perms/Owner columns';
 $string['showpermowner_desc'] = 'Show permissions and owner columns in listing.';
 $string['calcfoldersize'] = 'Calculate directory size';
-$string['calcfoldersize_desc'] = 'Show size of directories. Note that this will slow down Tiny File Manager.';
+$string['calcfoldersize_desc'] = 'Show the size of directories. Note that this will slow down Tiny File Manager for large directory structures.';
 $string['units'] = '<abbr title="bytes">B</abbr>,<abbr title="kilobytes">KB</abbr>,<abbr title="megabytes">MB</abbr>,<abbr title="gigabytes">GB</abbr>,<abbr title="terabytes">TB</abbr>,<abbr title="petabytes">PB</abbr>,<abbr title="exabytes">EB</abbr>,<abbr title="zettabytes">ZB</abbr>,<abbr title="yottabytes">YB</abbr>';

@@ -213,7 +213,7 @@ https://github.com/michael-milette/moodle-local_tinyfilemanager
 
 # License
 
-Copyright © 2021 TNG Consulting Inc. - https://www.tngconsulting.ca/
+Copyright © 2019-2022 TNG Consulting Inc. - https://www.tngconsulting.ca/
 
 This file is part of TinyFileManager for Moodle - http://moodle.org/
 

@@ -14,4 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with Tiny File Manager. If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * This plugin for Moodle is used by administrators to manage files through a web interface..
+ *
+ * @package    local_tinyfilemanager
+ * @copyright  2019-2022 TNG Consulting Inc. - www.tngconsulting.ca
+ * @author     Michael Milette
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 include 'tinyfilemanager.php';

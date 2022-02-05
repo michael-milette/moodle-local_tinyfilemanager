@@ -19,7 +19,7 @@
  *
  * @package   local_tinyfilemanager
  * @author    Michael Milette (https://www.tngconsulting.ca)
- * @copyright 2020-2021 TNG Consulting Inc.
+ * @copyright 2020-2022 TNG Consulting Inc.
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 

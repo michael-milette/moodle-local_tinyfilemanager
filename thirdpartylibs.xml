@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<libraries>
+    <library>
+        <location>amd/src/dropzone.js</location>
+        <name>dropzone.js</name>
+        <version>5.9.3</version>
+        <license>MIT</license>
+        <licenseversion>1.0</licenseversion>
+    </library>
+    <library>
+        <location>amd/src/ekko-lightbox.js</location>
+        <name>ekko-lightbox.js</name>
+        <version>5.3.0</version>
+        <license>MIT</license>
+        <licenseversion>1.0</licenseversion>
+    </library>
+    <library>
+        <location>amd/src/highlight.js</location>
+        <name>highlight.js</name>
+        <version>10.6.0</version>
+        <license>BSD</license>
+        <licenseversion>3-Clause</licenseversion>
+    </library>
+    <library>
+        <location>amd/src/datatables.js</location>
+        <name>datatables.js</name>
+        <version>10.6.0</version>
+        <license>BSD</license>
+        <licenseversion>3-Clause</licenseversion>
+    </library>
+</libraries>
