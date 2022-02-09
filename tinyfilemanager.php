@@ -38,6 +38,7 @@ $PAGE->set_url($rooturl);
 $PAGE->requires->css('/local/tinyfilemanager/styles/datatables.min.css');
 $PAGE->requires->css('/local/tinyfilemanager/styles/dropzone.min.css');
 $PAGE->requires->css('/local/tinyfilemanager/styles/ekko-lightbox.css');
+$PAGE->requires->css('/local/tinyfilemanager/styles/highlight/vs.css');
 // $PAGE->requires->js_call_amd('local_tinyfilemanager/ekko-lightbox', 'init');
 // $PAGE->requires->js_call_amd('local_tinyfilemanager/dropzone', 'init');
 // $PAGE->requires->js_call_amd('local_tinyfilemanager/highlight', 'init');
@@ -106,8 +107,6 @@ define('FM_SELF_URL', $CFG->wwwroot . '/local/tinyfilemanager/');
 // Doc - https://www.php.net/manual/en/function.date.php
 // Set to ISO 8601 so that it can be sorted by date.
 define('FM_DATETIME_FORMAT', '%Y-%m-%d, %H:%M:%S');
-
-define('FM_LOCKSETTINGS', 1);
 
 // --- EDIT BELOW CONFIGURATION CAREFULLY ---
 
@@ -3221,8 +3220,6 @@ function fm_show_header() {
     ?>
 </div>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.min.js"></script>
-
 <script src="amd/build/datatables.min.js"></script>
 <!-- <script src="amd/build/ekko-lightbox.min.js"></script> -->
 <?php if (FM_USE_HIGHLIGHTJS) { ?>
