@@ -1,14 +1,16 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## [2.4.7] - 2022-02-04 (DEV)
+## [2.4.7] - 2022-02-10 (DEV)
 
-Note that this is a development release. The Advanced Editor still has display issues with most Moodle themes.
+Note that this is a development release.
 
 ### Added
 - Dutch translation.
 - Romanian language w/o diacritics.
 - Tested for compatibility with Moodle 4.0 ALPHA.
+- Setting to choose online viewer for office documents.
+- Setting to choose theme for source code viewer.
 - Composer.json file.
 
 ### Updated
@@ -16,7 +18,14 @@ Note that this is a development release. The Advanced Editor still has display i
 - Removed Help in Advanced editor toolbar.
 - Changed "Folder is empty" message to be language-specific.
 - The file config.json is now local.
-- Disabled advanced editor until it can be fixed.
+- Disabled advanced editor. It has display issues with most Moodle themes.
+- Source code viewer.
+- Removed dead code.
+- Removed search box when not in list of files.
+- Updated appearance of error messages.
+- Fixed display of status messages when saving or backing up a file.
+- Upload now initially displays Dropzone and upload fields on separate tabs.
+- Most JavaScript and CSS files are now included in the plugin for offline use.
 - Copyright notice for 2022.
 
 ## [2.4.6] - 2021-12-15 (DEV)
