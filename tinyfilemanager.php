@@ -115,7 +115,7 @@ $use_highlightjs = true;
 
 // highlight.js style
 // for dark theme use 'ir-black'
-$highlightjs_style = 'vs';
+$highlightjs_style = get_config('local_tinyfilemanager', 'highlighttheme');
 
 // Enable ace.js (https://ace.c9.io/) on view's page
 define('FM_EDIT_FILE', false);
@@ -176,7 +176,7 @@ $exclude_items = array();
 // google => View documents using Google Docs Viewer
 // microsoft => View documents using Microsoft Web Apps Viewer
 // false => disable online doc viewer
-$online_viewer = 'google';
+$online_viewer = get_config('local_tinyfilemanager', 'onlineviewer');;
 
 // Sticky Nav bar
 // true => enable sticky header
@@ -3221,19 +3221,21 @@ function fm_show_header() {
 </div>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="amd/build/datatables.min.js"></script>
-<!-- <script src="amd/build/ekko-lightbox.min.js"></script> -->
+<script src="amd/build/ekko-lightbox.min.js"></script>
 <?php if (FM_USE_HIGHLIGHTJS) { ?>
     <script src="amd/build/highlight.min.js"></script>
     <script>hljs.highlightAll(); var isHighlightingEnabled = true;</script>
 <?php } ?>
 <script>
-    $(document).on('click', '[data-toggle="lightbox"]', function(event) {
-        event.preventDefault();
-        var reInitHighlight = function() { if(typeof isHighlightingEnabled !== "undefined" && isHighlightingEnabled) { setTimeout(function () { $('.ekko-lightbox-container pre code').each(function (i, e) { hljs.highlightBlock(e) }); }, 555); } };
-        $(this).ekkoLightbox({
-            alwaysShowClose: true, showArrows: true, onShown: function() { reInitHighlight(); }, onNavigate: function(direction, itemIndex) { reInitHighlight(); }
+    //require(["jquery","ekkolightbox"], (function($){
+        $(document).on('click', '[data-toggle="lightbox"]', function(event) {
+            event.preventDefault();
+            var reInitHighlight = function() { if(typeof isHighlightingEnabled !== "undefined" && isHighlightingEnabled) { setTimeout(function () { $('.ekko-lightbox-container pre code').each(function (i, e) { hljs.highlightBlock(e) }); }, 555); } };
+            $(this).ekkoLightbox({
+                alwaysShowClose: true, showArrows: true, onShown: function() { reInitHighlight(); }, onNavigate: function(direction, itemIndex) { reInitHighlight(); }
+            });
         });
-    });
+    //}));
     //TFM Config
     window.curi = "config.json", window.config = null;
     function fm_get_config(){ if(!!window.name){ window.config = JSON.parse(window.name); } else { $.getJSON(window.curi).done(function(c) { if(!!c) { window.name = JSON.stringify(c), window.config = c; } }); }}

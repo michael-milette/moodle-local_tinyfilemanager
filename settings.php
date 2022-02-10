@@ -67,4 +67,25 @@ if ($hassiteconfig) {
     $description = get_string('rootpath_desc', 'local_tinyfilemanager');
     $setting = new admin_setting_configtext($name, $title, $description, $default, PARAM_PATH);
     $settings->add($setting);
+
+    // Option to select the Office online document viewer.
+    $default = 'google'; // Default is to use the Google document viewer.
+    $name = 'local_tinyfilemanager/onlineviewer';
+    $title = get_string('onlineviewer', 'local_tinyfilemanager');
+    $description = get_string('onlineviewer_desc', 'local_tinyfilemanager');
+    $choices = ['false' => get_string('plugindisabled', 'plugin'),
+            'google' => get_string('google', 'local_tinyfilemanager'),
+            'microsoft' => get_string('microsoft', 'local_tinyfilemanager')];
+    $setting = new admin_setting_configselect($name, $title, $description, $default, $choices);
+    $settings->add($setting);
+
+    // Option to select the source code highligh theme.
+    $default = 'vs.css'; // Default is to use the base VSCode theme.
+    $name = 'local_tinyfilemanager/highlighttheme';
+    $title = get_string('highlighttheme', 'local_tinyfilemanager');
+    $description = get_string('highlighttheme_desc', 'local_tinyfilemanager');
+    $choices = array_diff(scandir(dirname(__FILE__) . '/styles/highlight'), array('.', '..', 'base16'));
+    $choices = array_combine($choices, $choices);
+    $setting = new admin_setting_configselect($name, $title, $description, $default, $choices);
+    $settings->add($setting);
 }

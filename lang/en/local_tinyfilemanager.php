@@ -37,3 +37,14 @@ $string['showpermowner_desc'] = 'Show permissions and owner columns in listing.'
 $string['calcfoldersize'] = 'Calculate directory size';
 $string['calcfoldersize_desc'] = 'Show the size of directories. Note that this will slow down Tiny File Manager for large directory structures.';
 $string['units'] = '<abbr title="bytes">B</abbr>,<abbr title="kilobytes">KB</abbr>,<abbr title="megabytes">MB</abbr>,<abbr title="gigabytes">GB</abbr>,<abbr title="terabytes">TB</abbr>,<abbr title="petabytes">PB</abbr>,<abbr title="exabytes">EB</abbr>,<abbr title="zettabytes">ZB</abbr>,<abbr title="yottabytes">YB</abbr>';
+$string['onlineviewer'] = 'Office document viewer';
+$string['onlineviewer_desc'] = 'Online document viewer options:<br>
+<ul>
+<li>Disabled: Disable online doc viewer.</li>
+<li>Google: View documents using Google Docs Viewer.</li>
+<li>Microsoft: View documents using Microsoft Web Apps Viewer.</li>
+</ul>';
+$string['highlighttheme'] = 'Source code highlighting';
+$string['highlighttheme_desc'] = 'Select a theme for highlighting source code when viewing a file.';
+$string['google'] = 'Google';
+$string['microsoft'] = 'Microsoft';
