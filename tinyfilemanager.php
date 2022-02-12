@@ -309,7 +309,7 @@ defined('FM_ROOT_URL') || define('FM_ROOT_URL', $CFG->wwwroot . (!empty($root_ur
 
 // Validate connection IP
 if ($ip_ruleset != 'OFF') {
-    $clientIp = $_SERVER['REMOTE_ADDR'];
+    $clientIp = getremoteaddr();
 
     $proceed = false;
 
