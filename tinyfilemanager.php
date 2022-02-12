@@ -748,7 +748,7 @@ if (!FM_READONLY) {
 
         $filename = $f['file']['name'];
         $tmp_name = $f['file']['tmp_name'];
-        $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        $ext = pathinfo($filename, PATHINFO_FILENAME) != '' ? strtolower(pathinfo($filename, PATHINFO_EXTENSION)) : '';
         $isFileAllowed = ($allowed) ? in_array($ext, $allowed) : true;
 
         if (!fm_isvalid_filename($filename) && !fm_isvalid_filename($_REQUEST['fullpath'])) {
@@ -761,12 +761,12 @@ if (!FM_READONLY) {
 
         $targetPath = $path . $ds;
         if (is_writable($targetPath)) {
-            $fullPath = $path . '/' . str_replace("./", "_", $_REQUEST['fullpath']);
+            $fullPath = $path . '/' . basename($_REQUEST['fullpath']);
             $folder = substr($fullPath, 0, strrpos($fullPath, "/"));
 
             if (file_exists($fullPath) && !$override_file_name) {
                 $ext_1 = $ext ? '.'.$ext : '';
-                $fullPath = str_replace($ext_1, '', $fullPath) .'_'. date('Ymd-His'). $ext_1;
+                $fullPath = $path . '/' . basename($_REQUEST['fullpath'], $ext_1) .'_'. date('Ymd-His'). $ext_1;
             }
 
             if (!is_dir($folder)) {
