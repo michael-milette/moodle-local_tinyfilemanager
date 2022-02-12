@@ -122,7 +122,7 @@ $CONFIG = '{"lang":"' . $lang . '","error_reporting":' . $CFG->debugdisplay . ',
 
 
 /**
- * H3K | Tiny File Manager V2.4.6
+ * H3K | Tiny File Manager V2.4.7
  * CCP Programmers | ccpprogrammers@gmail.com
  * https://tinyfilemanager.github.io
  */
@@ -1700,10 +1700,7 @@ $tableTheme = "bg-white";
             if ($parent !== false) {
                 ?>
                 <tr>
-                    <?php if (!FM_READONLY): ?>
-                    <td class="nosort"></td>
-                    <?php endif; ?>
-                    <a href="?p=<?php echo urlencode($parent) ?>" style="font-size: 20px"><i class="fa fa-chevron-circle-left go-back" ></i> .. <?php echo lng('Back') ?></a>
+                    <?php if (!FM_READONLY): ?><td class="nosort"></td><?php endif; ?>
                     <td class="border-0"><a href="?p=<?php echo urlencode($parent) ?>"><i class="fa fa-chevron-circle-left go-back"></i> ..</a></td>
                     <td class="border-0"></td>
                     <td class="border-0"></td>
