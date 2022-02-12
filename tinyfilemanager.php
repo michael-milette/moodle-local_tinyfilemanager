@@ -33,7 +33,35 @@ $context = context_system::instance();
 $PAGE->set_context($context);
 $PAGE->set_heading($SITE->fullname);
 $PAGE->set_pagelayout('standard');
-$PAGE->set_title(get_string('pluginname', 'local_tinyfilemanager'));
+
+// Page title and heading.
+switch (true) {
+    case !empty($thisfile = optional_param('view', '', PARAM_FILE)):
+        $title = get_string('view') . ': ' . $thisfile;
+        $action = 'view';
+        break;
+    case !empty($thisfile = optional_param('edit', '', PARAM_FILE)):
+        $title = get_string('edit') . ': ' . $thisfile;
+        $action = 'edit';
+        break;
+    case (optional_param_array('file', '', PARAM_FILE)):
+        $title = get_string('bulkactions') . ': ' . get_string('copy');
+        $action = 'copy';
+        break;
+    case !empty($thisfile = optional_param('copy', '', PARAM_FILE)):
+        $title = get_string('copy') . ': ' . $thisfile;
+        $action = 'copy';
+        break;
+    case optional_param('upload', false, PARAM_BOOL):
+        $title = get_string('upload');
+        $action = 'upload';
+        break;
+    default:
+        $title = get_string('pluginname', 'local_tinyfilemanager');
+        $action = '';
+}
+
+$PAGE->set_title($title);
 $PAGE->set_url($rooturl);
 $PAGE->requires->css('/local/tinyfilemanager/styles/datatables.min.css');
 $PAGE->requires->css('/local/tinyfilemanager/styles/dropzone.min.css');
@@ -72,6 +100,10 @@ if (!empty($path != '')) {
         $parent_enc = urlencode($parent);
         $PAGE->navbar->add(fm_enc(fm_convert_win($exploded[$i])), $rooturl . "?p={$parent_enc}");
     }
+}
+
+if (!empty($action)) {
+    $PAGE->navbar->add($title);
 }
 
 // Admin level user is required.
@@ -1473,6 +1505,7 @@ if (!empty($file = optional_param('edit', null, PARAM_FILE))) {
         fm_set_msg(lng('File not found'), 'error');
         fm_redirect(FM_SELF_URL . '?p=' . urlencode(FM_PATH));
     }
+    $editFile = ' : <i><b>'. $file. '</b></i>';
     header('X-XSS-Protection:0');
     fm_show_header(); // HEADER
     fm_show_nav_path(FM_PATH); // current path
@@ -1667,9 +1700,10 @@ $tableTheme = "bg-white";
             if ($parent !== false) {
                 ?>
                 <tr>
-                    <?php if (!FM_READONLY) { ?>
+                    <?php if (!FM_READONLY): ?>
                     <td class="nosort"></td>
-                    <?php } ?>
+                    <?php endif; ?>
+                    <a href="?p=<?php echo urlencode($parent) ?>" style="font-size: 20px"><i class="fa fa-chevron-circle-left go-back" ></i> .. <?php echo lng('Back') ?></a>
                     <td class="border-0"><a href="?p=<?php echo urlencode($parent) ?>"><i class="fa fa-chevron-circle-left go-back"></i> ..</a></td>
                     <td class="border-0"></td>
                     <td class="border-0"></td>
@@ -2256,6 +2290,28 @@ function fm_get_size($file)
 
     // if all else fails
     return filesize($file);
+}
+
+/**
+ * Get formatted filesize
+ * @param int $bytes
+ * @return string
+ */
+function fm_get_filesize($bytes)
+{
+    static $thousandssep;
+    static $decsep;
+    static $units;
+    if (empty($decsep)) {
+        $thousandssep = get_string('thousandssep', 'langconfig');
+        $decsep = get_string('decsep', 'langconfig');
+        $units = explode(',', get_string('units', 'local_tinyfilemanager'));
+    }
+    $bytes = (float) $bytes;
+    $base = 1024;
+    $factor = min((int) log($bytes, $base), count($units) - 1);
+    $precision = [0, 2, 2, 1, 1, 1, 1, 0];
+    return sprintf('%s %s', number_format($bytes / pow($base, $factor), $precision[$factor], $decsep, $thousandssep), $units[$factor]);
 }
 
 /**
@@ -3099,7 +3155,7 @@ class FM_Zipper_Tar
  */
 function fm_show_nav_path($path, $showsearch = false)
 {
-    global $lang, $sticky_navbar;
+    global $lang, $sticky_navbar, $editFile;
     $isStickyNavBar = $sticky_navbar ? 'fixed-top' : '';
     $getTheme = fm_get_theme();
     $getTheme .= " navbar-light bg-white";
