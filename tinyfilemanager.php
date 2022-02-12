@@ -2215,46 +2215,39 @@ function fm_get_size($file)
 }
 
 /**
- * Get formatted filesize
- * @param int $bytes
- * @return string
- */
-function fm_get_filesize($bytes)
-{
-    static $thousandssep;
-    static $decsep;
-    static $units;
-    if (empty($decsep)) {
-        $thousandssep = get_string('thousandssep', 'langconfig');
-        $decsep = get_string('decsep', 'langconfig');
-        $units = explode(',', get_string('units', 'local_tinyfilemanager'));
-    }
-    $bytes = (float) $bytes;
-    $base = 1024;
-    $factor = min((int) log($bytes, $base), count($units) - 1);
-    $precision = [0, 2, 2, 1, 1, 1, 1, 0];
-    return sprintf('%s %s', number_format($bytes / pow($base, $factor), $precision[$factor], $decsep, $thousandssep), $units[$factor]);
-}
-
-/**
  * Get director total size
  * @param string $directory
- * @return string
+ * @return string|int
  */
 function fm_get_directorysize($directory) {
     global $calc_folder;
     if ($calc_folder==true) { //  Slower output
-      $size = 0;  $count= 0;  $dirCount= 0;
-    foreach(new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directory)) as $file)
-    if ($file->isFile())
-        {   $size+=$file->getSize();
-            $count++;
+        // Do it this way if we can, it's much faster.
+        if (!empty($CFG->pathtodu) && is_executable(trim($CFG->pathtodu))) {
+            $command = trim($CFG->pathtodu).' -sb '.escapeshellarg($rootdir);
+            $output = null;
+            $return = null;
+            exec($command, $output, $return);
+            if (is_array($output)) {
+                // We told it to return bytes.
+                return get_real_size(intval($output[0]));
+            }
         }
-    else if ($file->isDir()) { $dirCount++; }
-    // return [$size, $count, $dirCount];
-    return $size;
+        $size = 0;
+        $count= 0;
+        $dirCount= 0;
+        foreach(new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directory)) as $file) {
+            if ($file->isFile()) {
+                $size+=$file->getSize();
+                $count++;
+            } else if ($file->isDir()) {
+                $dirCount++;
+            }
+        }
+        // return [$size, $count, $dirCount];
+        return $size;
     }
-    else return 'Folder'; //  Quick output
+    return lng('Folder'); //  Quick output
 }
 
 /**

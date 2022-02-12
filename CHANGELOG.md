@@ -1,7 +1,7 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## [2.4.7] - 2022-02-10 (DEV)
+## [2.4.7] - 2022-02-12 (DEV)
 
 Note that this is a development release.
 
@@ -14,6 +14,7 @@ Note that this is a development release.
 - Composer.json file.
 
 ### Updated
+- Optimized getting directory tree size by using pathtodu if available.
 - Fixed '400 bad request' when saving files.
 - Removed Help in Advanced editor toolbar.
 - Changed "Folder is empty" message to be language-specific.
