@@ -2312,39 +2312,34 @@ function fm_get_filesize($bytes)
 }
 
 /**
- * Get director total size
- * @param string $directory
- * @return string|int
+ * Get total size of directory tree.
+ *
+ * @param  string $directory Relative or absolute directory name.
+ * @return int Total number of bytes.
  */
 function fm_get_directorysize($directory) {
-    global $calc_folder;
-    if ($calc_folder==true) { //  Slower output
+    $bytes = 0;
+    $directory = realpath($directory);
+
+    if ($directory !== false && $directory != '' && file_exists($directory)){
+
         // Do it this way if we can, it's much faster.
         if (!empty($CFG->pathtodu) && is_executable(trim($CFG->pathtodu))) {
             $command = trim($CFG->pathtodu).' -sb '.escapeshellarg($rootdir);
-            $output = null;
-            $return = null;
-            exec($command, $output, $return);
-            if (is_array($output)) {
-                // We told it to return bytes.
-                return get_real_size(intval($output[0]));
+            $output = [];
+            $retval = 0;
+            exec($command, $output, $retval);
+            $output = exec('du -sb ' . $directory, $output, $retval);
+            if (empty($retval)) {
+                $bytes = get_real_size(is_array($output) ? $output[0] : $output);
+            }
+        } else {
+            foreach(new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directory, FilesystemIterator::SKIP_DOTS)) as $file){
+                $bytes += $file->getSize();
             }
         }
-        $size = 0;
-        $count= 0;
-        $dirCount= 0;
-        foreach(new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directory)) as $file) {
-            if ($file->isFile()) {
-                $size+=$file->getSize();
-                $count++;
-            } else if ($file->isDir()) {
-                $dirCount++;
-            }
-        }
-        // return [$size, $count, $dirCount];
-        return $size;
     }
-    return lng('Folder'); //  Quick output
+    return $bytes;
 }
 
 /**
