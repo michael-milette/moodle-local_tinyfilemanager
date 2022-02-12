@@ -88,6 +88,7 @@ if (!is_siteadmin()) {
 $lang = strtolower(substr(current_language(), 0, 2));
 $CONFIG = '{"lang":"' . $lang . '","error_reporting":' . $CFG->debugdisplay . ',"show_hidden":true,"hide_Cols":false,"calc_folder":false,"theme":"light"}';
 
+
 /**
  * H3K | Tiny File Manager V2.4.6
  * CCP Programmers | ccpprogrammers@gmail.com
@@ -731,6 +732,9 @@ if (!FM_READONLY) {
     // Upload
     if (!empty($_FILES)) {
         $override_file_name = false;
+        $chunkIndex = $_POST['dzchunkindex'];
+        $chunkTotal = $_POST['dztotalchunkcount'];
+
         $f = $_FILES;
         $path = FM_ROOT_PATH;
         $ds = DIRECTORY_SEPARATOR;
@@ -764,7 +768,7 @@ if (!FM_READONLY) {
             $fullPath = $path . '/' . basename($_REQUEST['fullpath']);
             $folder = substr($fullPath, 0, strrpos($fullPath, "/"));
 
-            if (file_exists($fullPath) && !$override_file_name) {
+            if (file_exists($fullPath) && !$override_file_name && !$chunks) {
                 $ext_1 = $ext ? '.'.$ext : '';
                 $fullPath = $path . '/' . basename($_REQUEST['fullpath'], $ext_1) .'_'. date('Ymd-His'). $ext_1;
             }
@@ -776,7 +780,39 @@ if (!FM_READONLY) {
             }
 
             if (empty($f['file']['error']) && !empty($tmp_name) && $tmp_name != 'none' && $isFileAllowed) {
-                if (move_uploaded_file($tmp_name, $fullPath)) {
+                if ($chunkTotal){
+                    $out = @fopen("{$fullPath}.part", $chunkIndex == 0 ? "wb" : "ab");
+                    if ($out) {
+                        $in = @fopen($tmp_name, "rb");
+                        if ($in) {
+                            while ($buff = fread($in, 4096)) { fwrite($out, $buff); }
+                        } else {
+                            $response = array (
+                            'status'    => 'error',
+                            'info' => "failed to open output stream"
+                            );
+                        }
+                        @fclose($in);
+                        @fclose($out);
+                        @unlink($tmp_name);
+
+                        $response = array (
+                            'status'    => 'success',
+                            'info' => "file upload successful",
+                            'fullPath' => $fullPath
+                        );
+                    } else {
+                        $response = array (
+                            'status'    => 'error',
+                            'info' => "failed to open output stream"
+                            );
+                    }
+
+                    if ($chunkIndex == $chunkTotal - 1) {
+                        rename("{$fullPath}.part", $fullPath);
+                    }
+
+                } else if (move_uploaded_file($tmp_name, $fullPath)) {
                     // Be sure that the file has been uploaded
                     if (file_exists($fullPath) ) {
                         $response = array (
@@ -1113,8 +1149,14 @@ if (!FM_READONLY) {
         <script src="amd/build/dropzone.min.js"></script>
         <script>
             Dropzone.options.fileUploader = {
+                chunking: true,
+                chunkSize: 10000000,
+                forceChunking: true,
+                retryChunks: true,
+                retryChunksLimit: 3,
+                parallelUploads: 1, // does not support more than 1!
                 timeout: 120000,
-                maxFilesize: <?php echo MAX_UPLOAD_SIZE; ?>,
+                maxFilesize: 10000000000,
                 acceptedFiles : "<?php echo getUploadExt() ?>",
                 init: function () {
                     this.on("sending", function (file, xhr, formData) {
@@ -1125,9 +1167,11 @@ if (!FM_READONLY) {
                         });
                     }).on("success", function (res) {
                         let _response = JSON.parse(res.xhr.response);
+
                         if(_response.status == "error") {
                             toast(_response.info);
                         }
+
                     }).on("error", function(file, response) {
                         toast(response);
                     });
