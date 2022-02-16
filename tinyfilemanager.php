@@ -438,7 +438,7 @@ if (isset($_POST['ajax']) && !FM_READONLY) {
             $relativeDirPath = fm_clean_path($parampath);
             $fullPath .= "{$relativeDirPath}/";
         }
-        $date = date("Ymd-His");
+        $date = userdate('backupnameformat');
         $newFileName = "{$fileName}-{$date}.bak";
         $fullyQualifiedFileName = $fullPath . $fileName;
         try {
@@ -653,7 +653,7 @@ if (!FM_READONLY) {
                     $extension_suffix = '.'.$fn_parts['extension'];
                 }
                 //Create new name for duplicate
-                $fn_duplicate = $fn_parts['dirname'].'/'.$fn_parts['filename'].'-'.date('Ymd-His').$extension_suffix;
+                $fn_duplicate = $fn_parts['dirname'].'/'.$fn_parts['filename'].'-'.userdate('backupnameformat').$extension_suffix;
                 $loop_count = 0;
                 $max_loop = 1000;
                 // Check if a file with the duplicate name already exists, if so, make new name (edge case...)
@@ -802,7 +802,7 @@ if (!FM_READONLY) {
 
             if (file_exists($fullPath) && !$override_file_name && !$chunks) {
                 $ext_1 = $ext ? '.'.$ext : '';
-                $fullPath = $path . '/' . basename($_REQUEST['fullpath'], $ext_1) .'_'. date('Ymd-His'). $ext_1;
+                $fullPath = $path . '/' . basename($_REQUEST['fullpath'], $ext_1) .'_'. userdate('backupnameformat') . $ext_1;
             }
 
             if (!is_dir($folder)) {
@@ -929,9 +929,9 @@ if (!FM_READONLY) {
             if (count($files) == 1) {
                 $one_file = reset($files);
                 $one_file = basename($one_file);
-                $zipname = $one_file . '_' . date('Ymd-His') . '.'.$ext;
+                $zipname = $one_file . '_' . userdate('backupnameformat') . '.'.$ext;
             } else {
-                $zipname = 'archive_' . date('Ymd-His') . '.'.$ext;
+                $zipname = 'archive_' . userdate('backupnameformat') . '.'.$ext;
             }
 
             if ($ext == 'zip') {
