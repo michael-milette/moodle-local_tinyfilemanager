@@ -1,11 +1,12 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## [2.4.7] - 2022-02-12 (DEV)
+## [2.4.7] - 2022-02-21 (DEV)
 
 Note that this is a development release.
 
 ### Added
+- Danish translation.
 - Dutch translation.
 - Romanian language w/o diacritics.
 - Tested for compatibility with Moodle 4.0 ALPHA.
