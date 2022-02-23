@@ -67,7 +67,7 @@ $PAGE->requires->css('/local/tinyfilemanager/styles/datatables.min.css');
 $PAGE->requires->css('/local/tinyfilemanager/styles/dropzone.min.css');
 $PAGE->requires->css('/local/tinyfilemanager/styles/ekko-lightbox.css');
 $PAGE->requires->css('/local/tinyfilemanager/styles/highlight/vs.css');
-// $PAGE->requires->js_call_amd('local_tinyfilemanager/ekko-lightbox', 'init');
+$PAGE->requires->js_call_amd('local_tinyfilemanager/ekko-lightbox', 'init');
 // $PAGE->requires->js_call_amd('local_tinyfilemanager/dropzone', 'init');
 // $PAGE->requires->js_call_amd('local_tinyfilemanager/highlight', 'init');
 // $PAGE->requires->js_call_amd('local_tinyfilemanager/datatables', 'init');
@@ -3306,7 +3306,7 @@ function fm_show_header() {
 </div>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="amd/build/datatables.min.js"></script>
-<script src="amd/build/ekko-lightbox.min.js"></script>
+<!--<script src="amd/build/ekko-lightbox.min.js"></script>-->
 <?php if (FM_USE_HIGHLIGHTJS) { ?>
     <script src="amd/build/highlight.min.js"></script>
     <script>hljs.highlightAll(); var isHighlightingEnabled = true;</script>
