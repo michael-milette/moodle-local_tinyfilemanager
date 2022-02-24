@@ -9,13 +9,15 @@ Note that this is a development release.
 - Danish translation.
 - Dutch translation.
 - Romanian language w/o diacritics.
-- Tested for compatibility with Moodle 4.0 ALPHA.
+- Tested for compatibility with Moodle 3.9 to 4.0 (ALPHA).
 - Setting to choose online viewer for office documents.
 - Setting to choose theme for source code viewer.
 - Composer.json file.
 
 ### Updated
-- Optimized getting directory tree size by using pathtodu if available.
+- Optimized getting directory tree size by using pathtodu, if available.
+- Backed-up, archived and duplicated files now use Moodle's backupnameformat date/time format.
+- Updated translations.
 - Fixed '400 bad request' when saving files.
 - Removed Help in Advanced editor toolbar.
 - Changed "Folder is empty" message to be language-specific.
