@@ -63,10 +63,10 @@ switch (true) {
 
 $PAGE->set_title($title);
 $PAGE->set_url($rooturl);
-$PAGE->requires->css('/local/tinyfilemanager/styles/datatables.min.css');
-$PAGE->requires->css('/local/tinyfilemanager/styles/dropzone.min.css');
-$PAGE->requires->css('/local/tinyfilemanager/styles/ekko-lightbox.css');
-$PAGE->requires->css('/local/tinyfilemanager/styles/highlight/vs.css');
+$PAGE->requires->css('/local/tinyfilemanager/style/datatables.min.css');
+$PAGE->requires->css('/local/tinyfilemanager/style/dropzone.min.css');
+$PAGE->requires->css('/local/tinyfilemanager/style/ekko-lightbox.css');
+$PAGE->requires->css('/local/tinyfilemanager/style/highlight/vs.css');
 $PAGE->requires->js_call_amd('local_tinyfilemanager/ekko-lightbox', 'init');
 // $PAGE->requires->js_call_amd('local_tinyfilemanager/dropzone', 'init');
 // $PAGE->requires->js_call_amd('local_tinyfilemanager/highlight', 'init');
@@ -3312,15 +3312,7 @@ function fm_show_header() {
     <script>hljs.highlightAll(); var isHighlightingEnabled = true;</script>
 <?php } ?>
 <script>
-    //require(["jquery","ekkolightbox"], (function($){
-        $(document).on('click', '[data-toggle="lightbox"]', function(event) {
-            event.preventDefault();
-            var reInitHighlight = function() { if(typeof isHighlightingEnabled !== "undefined" && isHighlightingEnabled) { setTimeout(function () { $('.ekko-lightbox-container pre code').each(function (i, e) { hljs.highlightBlock(e) }); }, 555); } };
-            $(this).ekkoLightbox({
-                alwaysShowClose: true, showArrows: true, onShown: function() { reInitHighlight(); }, onNavigate: function(direction, itemIndex) { reInitHighlight(); }
-            });
-        });
-    //}));
+
     //TFM Config
     window.curi = "config.json", window.config = null;
     function fm_get_config(){ if(!!window.name){ window.config = JSON.parse(window.name); } else { $.getJSON(window.curi).done(function(c) { if(!!c) { window.name = JSON.stringify(c), window.config = c; } }); }}

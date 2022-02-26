@@ -84,7 +84,7 @@ if ($hassiteconfig) {
     $name = 'local_tinyfilemanager/highlighttheme';
     $title = get_string('highlighttheme', 'local_tinyfilemanager');
     $description = get_string('highlighttheme_desc', 'local_tinyfilemanager');
-    $choices = array_diff(scandir(dirname(__FILE__) . '/styles/highlight'), array('.', '..', 'base16'));
+    $choices = array_diff(scandir(dirname(__FILE__) . '/style/highlight'), array('.', '..', 'base16'));
     $choices = array_combine($choices, $choices);
     $setting = new admin_setting_configselect($name, $title, $description, $default, $choices);
     $settings->add($setting);
