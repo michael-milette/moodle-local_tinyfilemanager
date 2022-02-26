@@ -69,7 +69,7 @@ if (optional_param('upload', false, PARAM_BOOL)) {
 }
 $PAGE->requires->css('/local/tinyfilemanager/style/ekko-lightbox.css');
 $PAGE->requires->css('/local/tinyfilemanager/style/highlight/vs.css');
-$PAGE->requires->js_call_amd('local_tinyfilemanager/ekko-lightbox', 'init');
+$PAGE->requires->js_call_amd('local_tinyfilemanager/ekko-lightbox');
 // $PAGE->requires->js_call_amd('local_tinyfilemanager/dropzone', 'init');
 // $PAGE->requires->js_call_amd('local_tinyfilemanager/highlight', 'init');
 // $PAGE->requires->js_call_amd('local_tinyfilemanager/datatables', 'init');
@@ -3308,7 +3308,6 @@ function fm_show_header() {
 </div>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="amd/build/datatables.min.js"></script>
-<!--<script src="amd/build/ekko-lightbox.min.js"></script>-->
 <?php if (FM_USE_HIGHLIGHTJS) { ?>
     <script src="amd/build/highlight.min.js"></script>
     <script>hljs.highlightAll(); var isHighlightingEnabled = true;</script>

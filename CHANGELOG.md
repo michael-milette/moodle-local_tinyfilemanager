@@ -1,7 +1,7 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## [2.4.7] - 2022-02-21 (DEV)
+## [2.4.7] - 2022-02-26 (DEV)
 
 Note that this is a development release.
 
@@ -15,6 +15,7 @@ Note that this is a development release.
 - Composer.json file.
 
 ### Updated
+- Preview is now working.
 - Optimized getting directory tree size by using pathtodu, if available.
 - Backed-up, archived and duplicated files now use Moodle's backupnameformat date/time format.
 - Updated translations.
