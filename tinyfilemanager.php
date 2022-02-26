@@ -64,7 +64,9 @@ switch (true) {
 $PAGE->set_title($title);
 $PAGE->set_url($rooturl);
 $PAGE->requires->css('/local/tinyfilemanager/style/datatables.min.css');
-$PAGE->requires->css('/local/tinyfilemanager/style/dropzone.min.css');
+if (optional_param('upload', false, PARAM_BOOL)) {
+    $PAGE->requires->css('/local/tinyfilemanager/style/dropzone.min.css');
+}
 $PAGE->requires->css('/local/tinyfilemanager/style/ekko-lightbox.css');
 $PAGE->requires->css('/local/tinyfilemanager/style/highlight/vs.css');
 $PAGE->requires->js_call_amd('local_tinyfilemanager/ekko-lightbox', 'init');
