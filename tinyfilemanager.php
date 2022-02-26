@@ -3158,7 +3158,7 @@ function fm_show_nav_path($path, $showsearch = false)
                 <ul class="navbar-nav mr-auto <?php echo fm_get_theme();  ?>">
                     <?php if ($showsearch) { ?>
                     <li class="nav-item mr-2">
-                        <div class="input-group input-group-sm mr-1" style="margin-top:4px;">
+                        <div class="input-group input-group-sm mr-1 mt-1">
                             <input type="text" class="form-control" placeholder="<?php echo lng('Search') ?>" aria-label="<?php echo lng('Search') ?>" aria-describedby="search-addon2" id="search-addon">
                             <div class="input-group-append">
                                 <span class="input-group-text" id="search-addon2"><i class="fa fa-search"></i></span>
