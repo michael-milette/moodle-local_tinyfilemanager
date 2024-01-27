@@ -6,8 +6,8 @@ Local TinyFileManager plugin for Moodle
 IMPORTANT NOTE: This plugin is under development. Use at your own risk!
 
 [![Releases](https://img.shields.io/github/release/qubyte/rubidium.svg?style=flat-square)](https://github.com/michael-milette/moodle-local_tinyfilemanager/releases)
-![PHP](https://img.shields.io/badge/PHP-v7.0%20to%20v7.4-blue.svg)
-![Moodle](https://img.shields.io/badge/Moodle-v3.2%20to%20v3.11.x-orange.svg)
+![PHP](https://img.shields.io/badge/PHP-v7.0%20to%20v8.2-blue.svg)
+![Moodle](https://img.shields.io/badge/Moodle-v3.2%20to%20v4.3.2.x-orange.svg)
 [![GitHub Issues](https://img.shields.io/github/issues/michael-milette/moodle-local_tinyfilemanager.svg)](https://github.com/michael-milette/moodle-local_tinyfilemanager/issues)
 [![Contributions welcome](https://img.shields.io/badge/contributions-welcome-green.svg)](#contributing)
 [![License](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](#license)
@@ -15,24 +15,34 @@ IMPORTANT NOTE: This plugin is under development. Use at your own risk!
 
 # Table of Contents
 
+- [Local TinyFileManager plugin for Moodle](#local-tinyfilemanager-plugin-for-moodle)
+- [Table of Contents](#table-of-contents)
 - [Basic Overview](#basic-overview)
+  - [Demo](#demo)
+    - [:loudspeaker: Features](#loudspeaker-features)
 - [Requirements](#requirements)
 - [Download](#download)
 - [Installation](#installation)
 - [Usage](#usage)
+  - [Configuring Settings](#configuring-settings)
+  - [Using](#using)
 - [Updating](#updating)
 - [Uninstallation](#uninstallation)
-- [Limitations](#limitations)
-- [Language Support](#language-support)
-- [Frequently Asked Questions (FAQ)](#faq)
+  - [Limitations](#limitations)
+  - [Language Support](#language-support)
+  - [FAQ](#faq)
+    - [Are there any security considerations?](#are-there-any-security-considerations)
+  - [Other questions](#other-questions)
 - [Contributing](#contributing)
+  - [Contributors](#contributors)
+  - [Pending Features](#pending-features)
 - [Motivation for this plugin](#motivation-for-this-plugin)
 - [Further information](#further-information)
 - [License](#license)
 
 # Basic Overview
 
-This is a port of Tiny File Manager for Moodle LMS. It supports multiple-languages storing, uploading, editing and managing files and folders in your website. The plugin runs on Moodle 3.0+. It includes build-in support for creating and managing text files and it supports syntax highlighting for over 150+ code languages.
+This is a port of Tiny File Manager for Moodle LMS. It supports multiple-languages storing, uploading, editing and managing files and folders in your website. The plugin runs on Moodle 3.2+. It includes build-in support for creating and managing text files and it supports syntax highlighting for over 150+ code languages.
 
 Because it can be used by Site Administrators in such a way that your Moodle site can become disabled, we recommend that it only be used by qualified trusted Moodle Site Administrators.
 
@@ -213,7 +223,7 @@ https://github.com/michael-milette/moodle-local_tinyfilemanager
 
 # License
 
-Copyright © 2019-2022 TNG Consulting Inc. - https://www.tngconsulting.ca/
+Copyright © 2019-2024 Consulting Inc. - https://www.tngconsulting.ca/
 
 This file is part of TinyFileManager for Moodle - http://moodle.org/
 

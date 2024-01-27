@@ -1,15 +1,14 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## [2.4.7] - 2022-02-26 (DEV)
-
-Note that this is a development release.
+## [2.4.7] - 2024-01-27
 
 ### Added
 - Danish translation.
 - Dutch translation.
 - Romanian language w/o diacritics.
-- Tested for compatibility with Moodle 3.9 to 4.0 (ALPHA).
+- Tested for compatibility with Moodle 3.9 to 4.3.
+- Compatible with PHP 7.0 to 8.2.
 - Setting to choose online viewer for office documents.
 - Setting to choose theme for source code viewer.
 - Composer.json file.
@@ -31,7 +30,7 @@ Note that this is a development release.
 - Fixed display of status messages when saving or backing up a file.
 - Upload now initially displays Dropzone and upload fields on separate tabs.
 - Most JavaScript and CSS files are now included in the plugin for offline use.
-- Copyright notice for 2022.
+- Copyright notice for 2024.
 
 ## [2.4.6] - 2021-12-15 (DEV)
 

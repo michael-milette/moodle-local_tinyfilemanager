@@ -18,7 +18,7 @@
  * Privacy Subsystem implementation for local_tinyfilemanager.
  *
  * @package    local_tinyfilemanager
- * @copyright  2019-2022 TNG Consulting Inc. - www.tngconsulting.ca
+ * @copyright  2019-2024 Consulting Inc. - www.tngconsulting.ca
  * @author     Michael Milette
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -30,7 +30,7 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * Privacy Subsystem for local_tinyfilemanager implementing null_provider.
  *
- * @copyright  2018-2022 TNG Consulting Inc. <www.tngconsulting.ca>
+ * @copyright  2018-2024 Consulting Inc. <www.tngconsulting.ca>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class provider implements \core_privacy\local\metadata\null_provider {

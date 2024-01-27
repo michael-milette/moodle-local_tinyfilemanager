@@ -20,7 +20,7 @@
  * @package   local_tinyfilemanager
  * @copyright 2013-2018 Alex Yashkin (MIT license)
  * @copyright 2014-2016 Icons by Yusuke Kamiyamane.
- * @copyright 2019-2022 TNG Consulting Inc. - www.tngconsulting.ca
+ * @copyright 2019-2024 Consulting Inc. - www.tngconsulting.ca
  * @author    Alex Yashkin
  * @author    Michael Milette, plugin version for Moodle LMS.
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -2164,7 +2164,7 @@ function get_absolute_path($path) {
  */
 function fm_clean_path($path, $trim = true)
 {
-    $path = $trim ? trim($path) : $path;
+    $path = $trim ? trim($path . ' ') : $path;
     $path = trim($path, '\\/');
     $path = str_replace(array('../', '..\\'), '', $path);
     $path =  get_absolute_path($path);
