@@ -442,7 +442,7 @@ if (isset($_POST['ajax']) && !FM_READONLY) {
             $relativeDirPath = fm_clean_path($parampath);
             $fullPath .= "{$relativeDirPath}/";
         }
-        $date = userdate('backupnameformat');
+        $date = userdate(time(),get_string('backupnameformat','langconfig'));
         $newFileName = "{$fileName}-{$date}.bak";
         $fullyQualifiedFileName = $fullPath . $fileName;
         try {
@@ -657,7 +657,7 @@ if (!FM_READONLY) {
                     $extension_suffix = '.'.$fn_parts['extension'];
                 }
                 //Create new name for duplicate
-                $fn_duplicate = $fn_parts['dirname'].'/'.$fn_parts['filename'].'-'.userdate('backupnameformat').$extension_suffix;
+                $fn_duplicate = $fn_parts['dirname'].'/'.$fn_parts['filename'].'-'.userdate(time(),get_string('backupnameformat','langconfig')).$extension_suffix;
                 $loop_count = 0;
                 $max_loop = 1000;
                 // Check if a file with the duplicate name already exists, if so, make new name (edge case...)
@@ -806,7 +806,7 @@ if (!FM_READONLY) {
 
             if (file_exists($fullPath) && !$override_file_name && !$chunks) {
                 $ext_1 = $ext ? '.'.$ext : '';
-                $fullPath = $path . '/' . basename($_REQUEST['fullpath'], $ext_1) .'_'. userdate('backupnameformat') . $ext_1;
+                $fullPath = $path . '/' . basename($_REQUEST['fullpath'], $ext_1) .'_'. userdate(time(),get_string('backupnameformat','langconfig')) . $ext_1;
             }
 
             if (!is_dir($folder)) {
@@ -933,9 +933,9 @@ if (!FM_READONLY) {
             if (count($files) == 1) {
                 $one_file = reset($files);
                 $one_file = basename($one_file);
-                $zipname = $one_file . '_' . userdate('backupnameformat') . '.'.$ext;
+                $zipname = $one_file . '_' . userdate(time(),get_string('backupnameformat','langconfig')) . '.'.$ext;
             } else {
-                $zipname = 'archive_' . userdate('backupnameformat') . '.'.$ext;
+                $zipname = 'archive_' . userdate(time(),get_string('backupnameformat','langconfig')) . '.'.$ext;
             }
 
             if ($ext == 'zip') {
@@ -2353,22 +2353,24 @@ function fm_get_directorysize($directory) {
  * @return array|bool
  */
 function fm_get_zif_info($path, $ext) {
-    if ($ext == 'zip' && function_exists('zip_open')) {
-        $arch = zip_open($path);
-        if ($arch) {
-            $filenames = array();
-            while ($zip_entry = zip_read($arch)) {
-                $zip_name = zip_entry_name($zip_entry);
+    if ($ext == 'zip' && class_exists('ZipArchive')) {
+        $zip = new ZipArchive();
+        $filenames = array();
+        if ($zip->open($path) === TRUE) {
+            for ($i = 0; $i < $zip->numFiles; $i++) {
+                $stat = $zip->statIndex($i);
+                $zip_name = $stat['name'];
                 $zip_folder = substr($zip_name, -1) == '/';
+                $filesize = isset($stat['size']) ? $stat['size'] : 0;
+                $compressed_size = isset($stat['comp_size']) ? $stat['comp_size'] : 0;
                 $filenames[] = array(
                     'name' => $zip_name,
-                    'filesize' => zip_entry_filesize($zip_entry),
-                    'compressed_size' => zip_entry_compressedsize($zip_entry),
+                    'filesize' => $filesize,
+                    'compressed_size' => $compressed_size,
                     'folder' => $zip_folder
-                    //'compression_method' => zip_entry_compressionmethod($zip_entry),
                 );
             }
-            zip_close($arch);
+            $zip->close();
             return $filenames;
         }
     } elseif($ext == 'tar' && class_exists('PharData')) {
