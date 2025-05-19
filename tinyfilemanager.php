@@ -20,7 +20,7 @@
  * @package   local_tinyfilemanager
  * @copyright 2013-2018 Alex Yashkin (MIT license)
  * @copyright 2014-2016 Icons by Yusuke Kamiyamane.
- * @copyright 2019-2024 Consulting Inc. - www.tngconsulting.ca
+ * @copyright 2019-2025 Consulting Inc. - www.tngconsulting.ca
  * @author    Alex Yashkin
  * @author    Michael Milette, plugin version for Moodle LMS.
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later

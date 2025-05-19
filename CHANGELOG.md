@@ -1,6 +1,16 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [2.4.7] - 2025-05-18
+
+### Added
+- Tested for compatibility with Moodle 3.9 to 5.0.
+- Compatible with PHP 7.0 to 8.4.
+### Updated
+- Removed dependency on jQuery and Datatables. Now uses Simple-Datatables.
+- Fixed file names when creating ZIP and TAR files.
+- Copyright notice.
+
 ## [2.4.7] - 2024-01-27
 
 ### Added
@@ -8,7 +18,7 @@ All notable changes to this project will be documented in this file.
 - Dutch translation.
 - Romanian language w/o diacritics.
 - Tested for compatibility with Moodle 3.9 to 4.3.
-- Compatible with PHP 7.0 to 8.2.
+- Compatible with PHP 7.0 to 7.4.
 - Setting to choose online viewer for office documents.
 - Setting to choose theme for source code viewer.
 - Composer.json file.
