@@ -1,0 +1,236 @@
+body#page-local-tinyfilemanager-index .datatable-wrapper.no-header .datatable-container {
+	border-top: 1px solid #d9d9d9;
+}
+
+body#page-local-tinyfilemanager-index .datatable-wrapper.no-footer .datatable-container {
+	border-bottom: 1px solid #d9d9d9;
+}
+
+body#page-local-tinyfilemanager-index .datatable-top,
+body#page-local-tinyfilemanager-index .datatable-bottom {
+	padding: 8px 10px;
+}
+
+body#page-local-tinyfilemanager-index .datatable-top > nav:first-child,
+body#page-local-tinyfilemanager-index .datatable-top > div:first-child,
+body#page-local-tinyfilemanager-index .datatable-bottom > nav:first-child,
+body#page-local-tinyfilemanager-index .datatable-bottom > div:first-child {
+	float: left;
+}
+
+body#page-local-tinyfilemanager-index .datatable-top > nav:last-child,
+body#page-local-tinyfilemanager-index .datatable-top > div:not(first-child),
+body#page-local-tinyfilemanager-index .datatable-bottom > nav:last-child,
+body#page-local-tinyfilemanager-index .datatable-bottom > div:last-child {
+	float: right;
+}
+
+body#page-local-tinyfilemanager-index .datatable-selector {
+	padding: 6px;
+}
+
+body#page-local-tinyfilemanager-index .datatable-input {
+	padding: 6px 12px;
+}
+
+body#page-local-tinyfilemanager-index .datatable-info {
+	margin: 7px 0;
+}
+
+/* PAGER */
+body#page-local-tinyfilemanager-index .datatable-pagination ul {
+	margin: 0;
+	padding-left: 0;
+}
+
+body#page-local-tinyfilemanager-index .datatable-pagination li {
+	list-style: none;
+	float: left;
+}
+
+body#page-local-tinyfilemanager-index .datatable-pagination li.datatable-hidden {
+    visibility: hidden;
+}
+
+body#page-local-tinyfilemanager-index .datatable-pagination a,
+body#page-local-tinyfilemanager-index .datatable-pagination button {
+	border: 1px solid transparent;
+	float: left;
+	margin-left: 2px;
+	padding: 6px 12px;
+	position: relative;
+	text-decoration: none;
+	color: #333;
+    cursor: pointer;
+}
+
+body#page-local-tinyfilemanager-index .datatable-pagination a:hover,
+body#page-local-tinyfilemanager-index .datatable-pagination button:hover {
+	background-color: #d9d9d9;
+}
+
+body#page-local-tinyfilemanager-index .datatable-pagination .datatable-active a,
+body#page-local-tinyfilemanager-index .datatable-pagination .datatable-active a:focus,
+body#page-local-tinyfilemanager-index .datatable-pagination .datatable-active a:hover,
+body#page-local-tinyfilemanager-index .datatable-pagination .datatable-active button,
+body#page-local-tinyfilemanager-index .datatable-pagination .datatable-active button:focus,
+body#page-local-tinyfilemanager-index .datatable-pagination .datatable-active button:hover {
+	background-color: #d9d9d9;
+	cursor: default;
+}
+
+body#page-local-tinyfilemanager-index .datatable-pagination .datatable-ellipsis a,
+body#page-local-tinyfilemanager-index .datatable-pagination .datatable-disabled a,
+body#page-local-tinyfilemanager-index .datatable-pagination .datatable-disabled a:focus,
+body#page-local-tinyfilemanager-index .datatable-pagination .datatable-disabled a:hover,
+body#page-local-tinyfilemanager-index .datatable-pagination .datatable-ellipsis button,
+body#page-local-tinyfilemanager-index .datatable-pagination .datatable-disabled button,
+body#page-local-tinyfilemanager-index .datatable-pagination .datatable-disabled button:focus,
+body#page-local-tinyfilemanager-index .datatable-pagination .datatable-disabled button:hover {
+    pointer-events: none;
+    cursor: default;
+}
+
+body#page-local-tinyfilemanager-index .datatable-pagination .datatable-disabled a,
+body#page-local-tinyfilemanager-index .datatable-pagination .datatable-disabled a:focus,
+body#page-local-tinyfilemanager-index .datatable-pagination .datatable-disabled a:hover,
+body#page-local-tinyfilemanager-index .datatable-pagination .datatable-disabled button,
+body#page-local-tinyfilemanager-index .datatable-pagination .datatable-disabled button:focus,
+body#page-local-tinyfilemanager-index .datatable-pagination .datatable-disabled button:hover {
+	cursor: not-allowed;
+	opacity: 0.4;
+}
+
+body#page-local-tinyfilemanager-index .datatable-pagination .datatable-pagination a,
+body#page-local-tinyfilemanager-index .datatable-pagination .datatable-pagination button {
+	font-weight: bold;
+}
+
+/* TABLE */
+body#page-local-tinyfilemanager-index .datatable-table {
+	max-width: 100%;
+	width: 100%;
+	border-spacing: 0;
+	border-collapse: separate;
+}
+
+body#page-local-tinyfilemanager-index .datatable-table > tbody > tr > td,
+body#page-local-tinyfilemanager-index .datatable-table > tbody > tr > th,
+body#page-local-tinyfilemanager-index .datatable-table > tfoot > tr > td,
+body#page-local-tinyfilemanager-index .datatable-table > tfoot > tr > th,
+body#page-local-tinyfilemanager-index .datatable-table > thead > tr > td,
+body#page-local-tinyfilemanager-index .datatable-table > thead > tr > th {
+	vertical-align: top;
+	padding: 8px 10px;
+}
+
+body#page-local-tinyfilemanager-index .datatable-table > thead > tr > th {
+	vertical-align: bottom;
+	text-align: left;
+	border-bottom: 1px solid #d9d9d9;
+}
+
+body#page-local-tinyfilemanager-index .datatable-table > tfoot > tr > th {
+	vertical-align: bottom;
+	text-align: left;
+	border-top: 1px solid #d9d9d9;
+}
+
+body#page-local-tinyfilemanager-index .datatable-table th {
+	vertical-align: bottom;
+	text-align: left;
+}
+
+body#page-local-tinyfilemanager-index .datatable-table th a {
+	text-decoration: none;
+	color: inherit;
+}
+
+body#page-local-tinyfilemanager-index .datatable-table th button,
+body#page-local-tinyfilemanager-index .datatable-pagination-list button {
+    color: inherit;
+    border: 0;
+    background-color: inherit;
+    cursor: pointer;
+    text-align: inherit;
+    font-family: inherit;
+    font-weight: inherit;
+    font-size: inherit;
+}
+
+body#page-local-tinyfilemanager-index .datatable-sorter,
+body#page-local-tinyfilemanager-index .datatable-filter {
+	display: inline-block;
+	height: 100%;
+	position: relative;
+	width: 100%;
+}
+
+body#page-local-tinyfilemanager-index .datatable-sorter::before,
+body#page-local-tinyfilemanager-index .datatable-sorter::after {
+	content: "";
+	height: 0;
+	width: 0;
+	position: absolute;
+	right: 4px;
+	border-left: 4px solid transparent;
+	border-right: 4px solid transparent;
+	opacity: 0.2;
+}
+
+
+body#page-local-tinyfilemanager-index .datatable-sorter::before {
+	border-top: 4px solid #000;
+	bottom: 0px;
+}
+
+body#page-local-tinyfilemanager-index .datatable-sorter::after {
+	border-bottom: 4px solid #000;
+	border-top: 4px solid transparent;
+	top: 0px;
+}
+
+body#page-local-tinyfilemanager-index .datatable-ascending .datatable-sorter::after,
+body#page-local-tinyfilemanager-index .datatable-descending .datatable-sorter::before,
+body#page-local-tinyfilemanager-index .datatable-ascending .datatable-filter::after,
+body#page-local-tinyfilemanager-index .datatable-descending .datatable-filter::before {
+	opacity: 0.6;
+}
+
+body#page-local-tinyfilemanager-index .datatable-filter::before {
+    content: "";
+    position: absolute;
+    right: 4px;
+    opacity: 0.2;
+    width: 0;
+    height: 0;
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+	border-radius: 50%;
+    border-top: 10px solid #000;
+    top: 25%;
+}
+
+body#page-local-tinyfilemanager-index .datatable-filter-active .datatable-filter::before {
+    opacity: 0.6;
+}
+
+.datatable-empty {
+	text-align: center;
+}
+
+body#page-local-tinyfilemanager-index .datatable-top::after,
+body#page-local-tinyfilemanager-index .datatable-bottom::after {
+	clear: both;
+	content: " ";
+	display: table;
+}
+
+body#page-local-tinyfilemanager-index table.datatable-table:focus tr.datatable-cursor > td:first-child {
+	border-left: 3px blue solid;
+}
+
+body#page-local-tinyfilemanager-index table.datatable-table:focus {
+	outline: solid 1px black;
+    outline-offset: -1px;
+}

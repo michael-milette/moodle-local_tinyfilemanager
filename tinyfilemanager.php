@@ -63,16 +63,18 @@ switch (true) {
 
 $PAGE->set_title($title);
 $PAGE->set_url($rooturl);
-$PAGE->requires->css('/local/tinyfilemanager/style/datatables.min.css');
+
 if (optional_param('upload', false, PARAM_BOOL)) {
     $PAGE->requires->css('/local/tinyfilemanager/style/dropzone.min.css');
 }
+$PAGE->requires->css('/local/tinyfilemanager/style/simple-datatables.css');
 $PAGE->requires->css('/local/tinyfilemanager/style/ekko-lightbox.css');
 $PAGE->requires->css('/local/tinyfilemanager/style/highlight/vs.css');
 $PAGE->requires->js_call_amd('local_tinyfilemanager/ekko-lightbox');
 // $PAGE->requires->js_call_amd('local_tinyfilemanager/dropzone', 'init');
 // $PAGE->requires->js_call_amd('local_tinyfilemanager/highlight', 'init');
 // $PAGE->requires->js_call_amd('local_tinyfilemanager/datatables', 'init');
+
 
 // Breadcrumb.
 
@@ -1676,7 +1678,7 @@ $tableTheme = "bg-white";
     <input type="hidden" name="p" value="<?php echo fm_enc(FM_PATH) ?>">
     <input type="hidden" name="group" value="1">
     <div class="table-responsive">
-        <table class="table table-bordered table-hover table-sm <?php echo $tableTheme; ?>" id="main-table">
+        <table class="table table-bordered table-hover table-sm table-striped <?php echo $tableTheme; ?>" id="main-table">
             <thead class="thead-white">
             <tr>
                 <?php if (!FM_READONLY) { ?>
@@ -1814,9 +1816,10 @@ $tableTheme = "bg-white";
                                 <?php echo($is_link ? ' &rarr; <i>' . readlink($path . '/' . $f) . '</i>' : '') ?>
                         </div>
                     </td>
-                    <td data-sort=b-"<?php echo str_pad($filesize_raw, 18, "0", STR_PAD_LEFT); ?>" class="right"><span title="<?php printf('%s bytes', $filesize_raw) ?>">
-                        <?php echo $filesize; ?>
-                        </span></td>
+                    <td class="right"
+                        data-sort="b-<?php echo str_pad($filesize_raw, 18, "0", STR_PAD_LEFT); ?>"
+                        title="<?php printf('%s bytes', $filesize) ?>"><?php echo $filesize_raw; ?>
+                    </td>
                     <td data-sort="b-<?php echo $modif_raw;?>"><?php echo $modif ?></td>
                     <?php if (!FM_IS_WIN && !$hide_Cols): ?>
                         <td><?php if (!FM_READONLY): ?><a title="<?php echo 'Change Permissions' ?>" href="?p=<?php echo urlencode(FM_PATH) ?>&amp;chmod=<?php echo urlencode($f) ?>"><?php echo $perms ?></a><?php else: ?><?php echo $perms ?><?php endif; ?>
@@ -3306,8 +3309,8 @@ function fm_show_header() {
         global $OUTPUT;
     ?>
 </div>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script src="amd/build/datatables.min.js"></script>
+<!-- Simple-DataTables CSS & JS -->
+<script src="third-party/simple-datatables/simple-datatables.js" ></script>
 <?php if (FM_USE_HIGHLIGHTJS) { ?>
     <script src="amd/build/highlight.min.js"></script>
     <script>hljs.highlightAll(); var isHighlightingEnabled = true;</script>
@@ -3316,7 +3319,20 @@ function fm_show_header() {
 
     //TFM Config
     window.curi = "config.json", window.config = null;
-    function fm_get_config(){ if(!!window.name){ window.config = JSON.parse(window.name); } else { $.getJSON(window.curi).done(function(c) { if(!!c) { window.name = JSON.stringify(c), window.config = c; } }); }}
+    function fm_get_config(){
+        if(!!window.name){
+            window.config = JSON.parse(window.name);
+        } else {
+            fetch(window.curi)
+                .then(function(response) { return response.json(); })
+                .then(function(c) {
+                    if(!!c) {
+                        window.name = JSON.stringify(c);
+                        window.config = c;
+                    }
+                });
+        }
+    }
     function template(html,options){
         var re=/<\%([^\%>]+)?\%>/g,reExp=/(^( )?(if|for|else|switch|case|break|{|}))(.*)?/g,code='var r=[];\n',cursor=0,match;var add=function(line,js){js?(code+=line.match(reExp)?line+'\n':'r.push('+line+');\n'):(code+=line!=''?'r.push("'+line.replace(/"/g,'\\"')+'");\n':'');return add}
         while(match=re.exec(html)){add(html.slice(cursor,match.index))(match[1],!0);cursor=match.index+match[0].length}
@@ -3371,87 +3387,191 @@ function fm_show_header() {
         }
     }
     //Upload files using URL @param {Object}
-    function upload_from_url($this) {
-        let form = $($this), resultWrapper = $("div#js-url-upload__list");
-        $.ajax({
-            type: form.attr('method'), url: form.attr('action'), data: form.serialize()+"&ajax="+true,
-            beforeSend: function() { form.find("input[name=uploadurl]").attr("disabled","disabled"); form.find("button").hide(); form.find(".lds-facebook").addClass('show-me'); },
-            success: function (data) {
-                if(data) {
-                    data = JSON.parse(data);
-                    if(data.done) {
-                        resultWrapper.append('<div class="alert alert-success row">Uploaded Successful: '+data.done.name+'</div>'); form.find("input[name=uploadurl]").val('');
-                    } else if(data['fail']) { resultWrapper.append('<div class="alert alert-danger row">Error: '+data.fail.message+'</div>'); }
-                    form.find("input[name=uploadurl]").removeAttr("disabled");form.find("button").show();form.find(".lds-facebook").removeClass('show-me');
+    function upload_from_url(formElem) {
+        let form = formElem;
+        let resultWrapper = document.querySelector("div#js-url-upload__list");
+        let formData = new FormData(form);
+        formData.append("ajax", true);
+        let uploadInput = form.querySelector("input[name=uploadurl]");
+        let button = form.querySelector("button");
+        let loader = form.querySelector(".lds-facebook");
+        if (uploadInput) uploadInput.setAttribute("disabled", "disabled");
+        if (button) button.style.display = "none";
+        if (loader) loader.classList.add("show-me");
+        fetch(form.action, {
+            method: form.method,
+            body: formData
+        })
+        .then(function(response) { return response.text(); })
+        .then(function(data) {
+            if (data) {
+                data = JSON.parse(data);
+                if (data.done) {
+                    if (resultWrapper) resultWrapper.insertAdjacentHTML('beforeend', '<div class="alert alert-success row">Uploaded Successful: '+data.done.name+'</div>');
+                    if (uploadInput) uploadInput.value = '';
+                } else if (data['fail']) {
+                    if (resultWrapper) resultWrapper.insertAdjacentHTML('beforeend', '<div class="alert alert-danger row">Error: '+data.fail.message+'</div>');
                 }
-            },
-            error: function(xhr) {
-                form.find("input[name=uploadurl]").removeAttr("disabled");form.find("button").show();form.find(".lds-facebook").removeClass('show-me');console.error(xhr);
+                if (uploadInput) uploadInput.removeAttribute("disabled");
+                if (button) button.style.display = "";
+                if (loader) loader.classList.remove("show-me");
             }
-        }); return false;
+        })
+        .catch(function(xhr) {
+            if (uploadInput) uploadInput.removeAttribute("disabled");
+            if (button) button.style.display = "";
+            if (loader) loader.classList.remove("show-me");
+            console.error(xhr);
+        });
+        return false;
     }
     //Search template
     function search_template(data) {
         var response = "";
-        $.each(data, function (key, val) {
+        data.forEach(function(val) {
             response += `<li><a href="?p=${val.path}&view=${val.name}">${val.path}/${val.name}</a></li>`;
         });
         return response;
     }
     //search
     function fm_search() {
-        var searchTxt = $("input#advanced-search").val(), searchWrapper = $("ul#search-wrapper"), path = $("#js-search-modal").attr("href"), _html = "", $loader = $("div.lds-facebook");
+        var searchInput = document.querySelector('input#advanced-search');
+        var searchTxt = searchInput ? searchInput.value : "";
+        var searchWrapper = document.querySelector('ul#search-wrapper');
+        var pathEl = document.getElementById('js-search-modal');
+        var path = pathEl ? pathEl.getAttribute('href') : "";
+        var _html = "";
+        var loader = document.querySelector('div.lds-facebook');
         if(!!searchTxt && searchTxt.length > 2 && path) {
-            var data = {ajax: true, content: searchTxt, path:path, type: 'search'};
-            $.ajax({
-                type: "POST",
-                url: window.location,
-                data: data,
-                beforeSend: function() {
-                    searchWrapper.html('');
-                    $loader.addClass('show-me');
-                },
-                success: function(data){
-                    $loader.removeClass('show-me');
-                    data = JSON.parse(data);
-                    if(data && data.length) {
-                        _html = search_template(data);
-                        searchWrapper.html(_html);
-                    } else { searchWrapper.html('<p class="m-2">No result found!<p>'); }
-                },
-                error: function(xhr) { $loader.removeClass('show-me'); searchWrapper.html('<p class="m-2">ERROR: Try again later!</p>'); },
-                failure: function(mes) { $loader.removeClass('show-me'); searchWrapper.html('<p class="m-2">ERROR: Try again later!</p>');}
+            var data = new FormData();
+            data.append('ajax', true);
+            data.append('content', searchTxt);
+            data.append('path', path);
+            data.append('type', 'search');
+            if (searchWrapper) searchWrapper.innerHTML = '';
+            if (loader) loader.classList.add('show-me');
+            fetch(window.location, {
+                method: 'POST',
+                body: data
+            })
+            .then(function(response) { return response.json(); })
+            .then(function(data) {
+                if (loader) loader.classList.remove('show-me');
+                if (data && data.length) {
+                    _html = search_template(data);
+                    if (searchWrapper) searchWrapper.innerHTML = _html;
+                } else {
+                    if (searchWrapper) searchWrapper.innerHTML = '<p class="m-2">No result found!<p>';
+                }
+            })
+            .catch(function() {
+                if (loader) loader.classList.remove('show-me');
+                if (searchWrapper) searchWrapper.innerHTML = '<p class="m-2">ERROR: Try again later!</p>';
             });
-        } else { searchWrapper.html("OOPS: minimum 3 characters required!"); }
+        } else {
+            if (searchWrapper) searchWrapper.innerHTML = "OOPS: minimum 3 characters required!";
+        }
     }
 
     //on mouse hover image preview
-    !function(s){s.previewImage=function(e){var o=s(document),t=".previewImage",a=s.extend({xOffset:20,yOffset:-20,fadeIn:"fast",css:{padding:"5px",border:"1px solid #cccccc","background-color":"#fff"},eventSelector:"[data-preview-image]",dataKey:"previewImage",overlayId:"preview-image-plugin-overlay"},e);return o.off(t),o.on("mouseover"+t,a.eventSelector,function(e){s("p#"+a.overlayId).remove();var o=s("<p>").attr("id",a.overlayId).css("position","absolute").css("display","none").append(s('<img class="c-preview-img">').attr("src",s(this).data(a.dataKey)));a.css&&o.css(a.css),s("body").append(o),o.css("top",e.pageY+a.yOffset+"px").css("left",e.pageX+a.xOffset+"px").fadeIn(a.fadeIn)}),o.on("mouseout"+t,a.eventSelector,function(){s("#"+a.overlayId).remove()}),o.on("mousemove"+t,a.eventSelector,function(e){s("#"+a.overlayId).css("top",e.pageY+a.yOffset+"px").css("left",e.pageX+a.xOffset+"px")}),this},s.previewImage()}(jQuery);
+    // Image preview on hover (vanilla JS replacement)
+    (function() {
+        var xOffset = 20, yOffset = -20;
+        var overlayId = "preview-image-plugin-overlay";
+        document.addEventListener('mouseover', function(e) {
+            var target = e.target.closest('[data-preview-image]');
+            if (target) {
+                var old = document.getElementById(overlayId);
+                if (old) old.remove();
+                var p = document.createElement('p');
+                p.id = overlayId;
+                p.style.position = 'absolute';
+                p.style.display = 'none';
+                p.style.padding = '5px';
+                p.style.border = '1px solid #cccccc';
+                p.style.backgroundColor = '#fff';
+                var img = document.createElement('img');
+                img.className = 'c-preview-img';
+                img.src = target.getAttribute('data-preview-image');
+                p.appendChild(img);
+                document.body.appendChild(p);
+                p.style.top = (e.pageY + yOffset) + 'px';
+                p.style.left = (e.pageX + xOffset) + 'px';
+                p.style.display = '';
+            }
+        });
+        document.addEventListener('mouseout', function(e) {
+            var target = e.target.closest('[data-preview-image]');
+            if (target) {
+                var old = document.getElementById(overlayId);
+                if (old) old.remove();
+            }
+        });
+        document.addEventListener('mousemove', function(e) {
+            var p = document.getElementById(overlayId);
+            if (p) {
+                p.style.top = (e.pageY + yOffset) + 'px';
+                p.style.left = (e.pageX + xOffset) + 'px';
+            }
+        });
+    })();
 
 
     // Dom Ready Event
-    $(document).ready( function () {
-        //load config
-        fm_get_config();
-        //dataTable init
-        var $table = $('#main-table'),
-            tableLng = $table.find('th').length,
-            _targets = (tableLng && tableLng == 7 ) ? [0, 4,5,6] : tableLng == 5 ? [0,4] : [3],
-            mainTable = $('#main-table').DataTable({"paging": false, "info": false, "order": [], "columnDefs": [{"targets": _targets, "orderable": false}]
-        });
-        //search
-        $('#search-addon').on( 'keyup', function () {
-            mainTable.search( this.value ).draw();
-        });
-        $("input#advanced-search").on('keyup', function (e) {
-            if (e.keyCode === 13) { fm_search(); }
-        });
-        $('#search-addon3').on( 'click', function () { fm_search(); });
-        //upload nav tabs
-        $(".fm-upload-wrapper .card-header-tabs").on("click", 'a', function(e){
-            e.preventDefault();let target=$(this).data('target');
-            $(".fm-upload-wrapper .card-header-tabs a").removeClass('active');$(this).addClass('active');
-            $(".fm-upload-wrapper .card-tabs-container").addClass('d-none');$(target).removeClass('d-none');
+    document.addEventListener('DOMContentLoaded', function () {
+        // load config
+        if (typeof fm_get_config === 'function') fm_get_config();
+
+        // Simple-DataTables init (show all rows, remove per-page dropdown)
+        var table = document.querySelector('#main-table');
+        if (table) {
+            // Only columns 1 (Name), 2 (Size), 3 (Modified) are sortable (0=checkbox, last=actions)
+            var dataTable = new simpleDatatables.DataTable(table, {
+                perPage: table.rows.length, // show all rows
+                perPageSelect: false, // hide per-page dropdown
+                searchable: false,
+                columns: [
+                    { select: 0, sortable: false }, // 0: Checkbox (not sortable)
+                    { select: 1, sortable: true },  // 1: Name (sortable)
+                    { select: 2, sortable: true },  // 2: Size (sortable)
+                    { select: 3, sortable: true },  // 3: Modified (sortable)
+                    { select: 4, sortable: false }  // 4+: Not sortable (Perms, Owner, Actions, etc.)
+                ]
+            });
+            // Custom search box integration
+            var searchBox = document.getElementById('search-addon');
+            if (searchBox) {
+                searchBox.addEventListener('input', function () {
+                    dataTable.search(this.value);
+                });
+            }
+        }
+
+        // Advanced search
+        var advSearch = document.querySelector('input#advanced-search');
+        if (advSearch) {
+            advSearch.addEventListener('keyup', function (e) {
+                if (e.keyCode === 13 && typeof fm_search === 'function') { fm_search(); }
+            });
+        }
+        var advSearchBtn = document.getElementById('search-addon3');
+        if (advSearchBtn) {
+            advSearchBtn.addEventListener('click', function () {
+                if (typeof fm_search === 'function') { fm_search(); }
+            });
+        }
+
+        // Upload nav tabs
+        var uploadTabs = document.querySelectorAll('.fm-upload-wrapper .card-header-tabs a');
+        uploadTabs.forEach(function(tab) {
+            tab.addEventListener('click', function(e) {
+                e.preventDefault();
+                var target = tab.getAttribute('data-target');
+                document.querySelectorAll('.fm-upload-wrapper .card-header-tabs a').forEach(function(a){ a.classList.remove('active'); });
+                tab.classList.add('active');
+                document.querySelectorAll('.fm-upload-wrapper .card-tabs-container').forEach(function(c){ c.classList.add('d-none'); });
+                if (target) document.querySelector(target).classList.remove('d-none');
+            });
         });
     });
 </script>
