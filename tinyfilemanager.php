@@ -3312,7 +3312,7 @@ function fm_show_header() {
     ?>
 </div>
 <!-- Simple-DataTables CSS & JS -->
-<script src="third-party/simple-datatables/simple-datatables.js" ></script>
+<script src="thirdparty/simple-datatables/simple-datatables.js" ></script>
 <?php if (FM_USE_HIGHLIGHTJS) { ?>
     <script src="amd/build/highlight.min.js"></script>
     <script>hljs.highlightAll(); var isHighlightingEnabled = true;</script>
