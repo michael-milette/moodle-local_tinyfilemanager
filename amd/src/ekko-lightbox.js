@@ -26,7 +26,7 @@ define(['jquery'], function($) {
 					}
 				});
 			});
-		};
+		}
 	};
 
 	var _createClass = (function () {

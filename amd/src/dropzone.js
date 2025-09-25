@@ -1,8 +1,13 @@
-import extend from "just-extend";
-import Emitter from "./emitter";
-import defaultOptions from "./options";
+// Adapted for Moodle AMD loader: wrap file in define([...], function(...) { ... })
+// The original module used ES module syntax. Replace the top-level import with
+// an AMD dependency and wrap the entire file contents below in a factory.
+define(["just-extend", "./emitter", "./options"], function(
+  extend,
+  Emitter,
+  defaultOptions
+) {
 
-export default class Dropzone extends Emitter {
+class Dropzone extends Emitter {
   static initClass() {
     // Exposing the emitter class, mainly for tests
     this.prototype.Emitter = Emitter;
@@ -2316,4 +2321,6 @@ function __guardMethod__(obj, methodName, transform) {
   }
 }
 
-export { Dropzone };
+  // Export Dropzone to AMD/RequireJS
+  return Dropzone;
+});
